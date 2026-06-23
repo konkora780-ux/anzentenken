@@ -238,6 +238,10 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .month-picker{margin-bottom:16px;}
 .month-picker label{display:block; font-size:12px; font-weight:700; color:#8893a2; margin:0 4px 6px;}
 .month-picker.compact{margin-bottom:12px;}
+.month-row{display:flex; gap:8px; align-items:stretch;}
+.month-row .month-select{flex:1;}
+.print-btn{flex-shrink:0; padding:0 16px; border-radius:12px; background:#2e5d8f; color:#fff; font-size:14px; font-weight:700; border:none; white-space:nowrap;}
+.print-btn:active{background:#22456b;}
 .month-select{
   width:100%; padding:13px 16px; font-size:16px; font-weight:600; color:var(--ink);
   border:1.5px solid var(--line); border-radius:12px; background:#fff;
@@ -704,8 +708,9 @@ function renderTeacher(){
   const monthOpts=monthOptions().map(k=>`<option value="${k}" ${k===MONTH?"selected":""}>${monthLabel(k)}</option>`).join("");
   app.innerHTML=`${topbar("点検状況",null,"goHome")}
   <div class="screen">
-    <div class="month-picker compact">
+    <div class="month-picker compact month-row">
       <select class="month-select" onchange="onTeacherMonthChange(this.value)">${monthOpts}</select>
+      <button class="print-btn" onclick="printMonthReport()" title="この月の報告書を印刷">🖨️ 印刷</button>
     </div>
     <button class="manage-fac-btn" onclick="goFacilityManage()">🏫 施設の管理（名前変更・追加・削除）</button>
     <button class="manage-fac-btn person" onclick="goPersonManage()">🧑‍🏫 担当の先生の管理（転勤・名前変更）</button>
@@ -721,6 +726,144 @@ function renderTeacher(){
   </div>`;
 }
 async function onTeacherMonthChange(key){ setMonth(key); await loadAllRecords(); await loadRepairs(); render(); }
+
+/* ---- 月次点検報告書の印刷 ---- */
+async function printMonthReport(){
+  // Supabase接続時のみ最新データを読み直す（未接続時は現在の表示データを使う）
+  if(sb){ await loadFacilities(); await loadAllRecords(); await loadRepairs(); }
+  const recs=state.records;
+  const submittedIds=new Set(recs.map(r=>r.facility_id));
+  const totalFac=FACILITIES.length, doneFac=submittedIds.size;
+  // 要修繕・要注意の抽出
+  const issues=[];
+  recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{
+    if(a[k].mark==="bad"||a[k].mark==="warn"){
+      const rep=repairOf(r.facility_id,parseInt(k));
+      issues.push({place:r.place,block:r.block,person:r.person,item:ITEMS[k],mark:a[k].mark,note:a[k].note,photos:a[k].photos||[],rep});
+    }
+  });});
+  issues.sort((a,b)=>(a.mark==="bad"?0:1)-(b.mark==="bad"?0:1));
+  const badN=issues.filter(i=>i.mark==="bad").length, warnN=issues.filter(i=>i.mark==="warn").length;
+
+  // 全施設の点検状況（区分ごと）
+  const byBlock={};FACILITIES.forEach(f=>{(byBlock[f.block]=byBlock[f.block]||[]).push(f);});
+  let facRows="";
+  Object.keys(byBlock).forEach(block=>{
+    facRows+=`<tr class="blockhead"><td colspan="4">${esc(block)}</td></tr>`;
+    byBlock[block].forEach(f=>{
+      const owner=personOf(f.id);
+      const done=submittedIds.has(f.id);
+      const rec=recs.find(r=>r.facility_id===f.id);
+      const issue=rec&&rec.has_issue;
+      const status=!owner?"未割当":!done?"未点検":issue?"要対応あり":"異常なし";
+      const cls=!owner?"st-na":!done?"st-todo":issue?"st-bad":"st-ok";
+      facRows+=`<tr><td>${esc(f.place)}</td><td>${esc(owner||"—")}</td><td class="${cls}">${status}</td></tr>`;
+    });
+  });
+
+  // 要修繕・要注意の明細（写真小さめ）
+  let issueRows="";
+  if(issues.length){
+    issueRows=issues.map(is=>{
+      const photos=(is.photos||[]).map(u=>`<img src="${u}">`).join("");
+      const repText = is.rep ? (is.rep.status==="done"?`対応済み（${esc(is.rep.person||"")}）`:`対応中（${esc(is.rep.person||"")}）`) : "未対応";
+      const repNote = is.rep&&is.rep.note ? `<div class="repnote">対応：${esc(is.rep.note)}</div>` : "";
+      return `<div class="issue-print ${is.mark}">
+        <div class="ip-head"><span class="ip-mark ${is.mark}">${is.mark==="bad"?"要修繕":"要注意"}</span>
+          <span class="ip-place">${esc(is.place)}</span><span class="ip-block">（${esc(is.block)}）</span>
+          <span class="ip-person">担当：${esc(is.person)}</span></div>
+        <div class="ip-item">${esc(is.item)}</div>
+        ${is.note?`<div class="ip-note">状況：${esc(is.note)}</div>`:""}
+        <div class="ip-rep">${repText}</div>${repNote}
+        ${photos?`<div class="ip-photos">${photos}</div>`:""}
+      </div>`;
+    }).join("");
+  } else {
+    issueRows=`<p class="none">この月の要修繕・要注意はありません。</p>`;
+  }
+
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+  const appUrl = location.href.split("#")[0].split("?")[0]; // 今開いているアプリのURL
+  const win=window.open("","_blank");
+  win.document.write(`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+  <title>${MONTH_LABEL} 安全点検報告書</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
+  <style>
+    @page{size:A4;margin:14mm;}
+    *{box-sizing:border-box;}
+    body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;color:#1a2433;font-size:11px;line-height:1.5;margin:0;}
+    h1{font-size:18px;text-align:center;margin:0 0 4px;}
+    .rep-header{position:relative;}
+    .qr-box{position:absolute;top:-4px;right:0;text-align:center;width:90px;}
+    .qr-box #qrcode{display:inline-block;}
+    .qr-box #qrcode img,.qr-box #qrcode canvas{width:72px!important;height:72px!important;}
+    .qr-label{font-size:8px;color:#666;margin-top:2px;line-height:1.3;}
+    .sub{text-align:center;color:#666;font-size:11px;margin-bottom:14px;}
+    .stat-row{display:flex;gap:10px;margin-bottom:16px;justify-content:center;}
+    .stat-box{border:1.5px solid #ccc;border-radius:6px;padding:8px 18px;text-align:center;}
+    .stat-box .n{font-size:20px;font-weight:bold;}
+    .stat-box .l{font-size:10px;color:#666;}
+    .stat-box.bad .n{color:#c0392b;} .stat-box.warn .n{color:#b5790a;} .stat-box.ok .n{color:#2e7d4f;}
+    h2{font-size:13px;border-left:4px solid #2e5d8f;padding-left:8px;margin:18px 0 8px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+    th,td{border:1px solid #ccc;padding:3px 6px;text-align:left;}
+    th{background:#eef3f9;font-size:10px;}
+    td{font-size:10px;}
+    .blockhead td{background:#f2f2f2;font-weight:bold;}
+    .st-ok{color:#2e7d4f;} .st-bad{color:#c0392b;font-weight:bold;} .st-todo{color:#999;} .st-na{color:#c0392b;}
+    .issue-print{border:1px solid #ddd;border-left:4px solid #c0392b;border-radius:4px;padding:7px 9px;margin-bottom:7px;page-break-inside:avoid;}
+    .issue-print.warn{border-left-color:#b5790a;}
+    .ip-head{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:10px;}
+    .ip-mark{font-weight:bold;padding:1px 6px;border-radius:3px;color:#fff;font-size:9px;}
+    .ip-mark.bad{background:#c0392b;} .ip-mark.warn{background:#b5790a;}
+    .ip-place{font-weight:bold;font-size:12px;} .ip-block,.ip-person{color:#666;}
+    .ip-item{font-weight:600;margin-top:3px;}
+    .ip-note,.repnote{font-size:10px;color:#444;margin-top:2px;}
+    .ip-rep{font-size:10px;margin-top:3px;font-weight:600;color:#2e5d8f;}
+    .ip-photos{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+    .ip-photos img{width:90px;height:90px;object-fit:cover;border:1px solid #ccc;border-radius:3px;}
+    .none{color:#666;text-align:center;padding:14px;}
+    .footer{margin-top:18px;text-align:right;font-size:10px;color:#888;}
+    @media print{.noprint{display:none;}}
+    .noprint{text-align:center;margin:14px 0;}
+    .noprint button{padding:10px 28px;font-size:14px;font-weight:bold;background:#2e5d8f;color:#fff;border:none;border-radius:8px;cursor:pointer;margin:0 6px;}
+  </style></head><body>
+  <div class="noprint">
+    <button onclick="window.print()">🖨️ 印刷する</button>
+    <button onclick="window.close()" style="background:#888">閉じる</button>
+  </div>
+  <div class="rep-header">
+    <div class="qr-box"><div id="qrcode"></div><div class="qr-label">アプリで確認<br>（iPad等で読取）</div></div>
+    <h1>令和${MONTH.split("-")[0]-2018}年度　安全点検報告書</h1>
+    <div class="sub">対象月：${MONTH_LABEL}　／　作成日：${todayStr}</div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-box ok"><div class="n">${doneFac}/${totalFac}</div><div class="l">点検済み施設</div></div>
+    <div class="stat-box bad"><div class="n">${badN}</div><div class="l">要修繕</div></div>
+    <div class="stat-box warn"><div class="n">${warnN}</div><div class="l">要注意</div></div>
+  </div>
+  <h2>要修繕・要注意の一覧</h2>
+  ${issueRows}
+  <h2>全施設の点検状況</h2>
+  <table><thead><tr><th style="width:50%">施設</th><th style="width:28%">担当者</th><th style="width:22%">状況</th></tr></thead>
+  <tbody>${facRows}</tbody></table>
+  <div class="footer">この報告書は安全点検アプリから出力されました。</div>
+  <script>
+    (function(){
+      function makeQR(){
+        try{
+          if(typeof QRCode!=="undefined"){
+            new QRCode(document.getElementById("qrcode"),{text:${JSON.stringify(appUrl)},width:72,height:72,correctLevel:QRCode.CorrectLevel.M});
+          } else { setTimeout(makeQR,200); }
+        }catch(e){ console.warn("QR生成",e); }
+      }
+      makeQR();
+    })();
+  <\/script>
+  </body></html>`);
+  win.document.close();
+}
 async function setTeacherTab(t){
   state.teacherTab=t;
   // タブを押すたびに最新データを読み直す
