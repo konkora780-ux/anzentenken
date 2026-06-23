@@ -293,6 +293,8 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .manage-fac-btn{width:100%; padding:14px; border-radius:12px; background:#eef3f9; color:var(--accent); font-size:14.5px; font-weight:700; border:1.5px solid #cdddf0; margin-bottom:16px;}
 .manage-fac-btn:active{background:#e2ecf6;}
 .manage-fac-btn.add{background:#eef7f1; color:var(--ok); border-color:#b8ddc5; margin-bottom:14px;}
+.manage-fac-btn.person{background:#f3eefb; color:#6b4b9e; border-color:#dcd0ee;}
+.manage-fac-btn.person:active{background:#ebe2f7;}
 .fac-manage-row{background:#fff; border-radius:12px; padding:13px 15px; margin-bottom:9px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; gap:10px;}
 .fac-manage-row .fmr-main{flex:1; min-width:0;}
 .fac-manage-row .fp{font-size:15px; font-weight:700;}
@@ -301,7 +303,9 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .fac-manage-row .act{padding:8px 12px; border-radius:9px; font-size:12.5px; font-weight:700;}
 .fac-manage-row .act.edit{background:#eef3f9; color:var(--accent);}
 .fac-manage-row .act.del{background:#fbe7e5; color:var(--bad);}
+.fac-manage-row .act.swap{background:#f3eefb; color:#6b4b9e;}
 .fac-manage-row .act:active{transform:scale(.96);}
+.swap-note{font-size:12.5px; color:#6b4b9e; background:#f3eefb; padding:9px 12px; border-radius:9px; margin-top:12px; line-height:1.5;}
 </style>
 </head>
 <body>
@@ -309,7 +313,7 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 <div class="toast" id="toast"></div>
 <script>
 const FACILITIES_SEED = [{"id": 0, "person": "高橋 晃", "block": "南校舎棟１F", "place": "校長室"}, {"id": 1, "person": "高橋 晃", "block": "南校舎棟１F", "place": "事務室"}, {"id": 2, "person": "鈴木 野乃香", "block": "南校舎棟１F", "place": "職員・来客玄関ポーチ"}, {"id": 3, "person": "鈴木 野乃香", "block": "北校舎棟１F", "place": "消火栓ポンプ室"}, {"id": 4, "person": "細川 功", "block": "南校舎棟１F", "place": "技能職員室"}, {"id": 5, "person": "細川 功", "block": "南校舎棟１F", "place": "職員トイレ(男)"}, {"id": 6, "person": "細川 功", "block": "北校舎棟１F", "place": "LPGボンベ庫・ゴミ置き場"}, {"id": 7, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "放送室"}, {"id": 8, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "視聴覚室"}, {"id": 9, "person": "玉山 幸平", "block": "南校舎棟２F", "place": "パソコン室"}, {"id": 10, "person": "村上 みさと", "block": "南校舎棟１F", "place": "職員室(小中分)"}, {"id": 11, "person": "村上 みさと", "block": "南校舎棟１F", "place": "湯沸室"}, {"id": 12, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "倉庫(職員室前)"}, {"id": 13, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "階段(職員室前)"}, {"id": 14, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "会議室"}, {"id": 15, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "教育相談室"}, {"id": 16, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "書庫"}, {"id": 17, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "エレベーター"}, {"id": 18, "person": "伊藤 弘美", "block": "南校舎棟２F", "place": "教材室（印刷室関係）"}, {"id": 19, "person": "星野 美和子", "block": "南校舎棟１F", "place": "支援室"}, {"id": 20, "person": "星野 美和子", "block": "南校舎棟１F", "place": "廊下(放送室前～EVホール～教材室)"}, {"id": 21, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "保健室"}, {"id": 22, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "倉庫(理科室隣)"}, {"id": 23, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "医療的ケア室"}, {"id": 24, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "小学部5年２組・6年2組"}, {"id": 25, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "児童生徒トイレ(男子)"}, {"id": 26, "person": "湊 敬子", "block": "南校舎棟１F", "place": "小学部１年１組"}, {"id": 27, "person": "湊 敬子", "block": "南校舎棟１F", "place": "職員更衣室(女)"}, {"id": 28, "person": "細越 捺美", "block": "南校舎棟１F", "place": "小学部1年2組・2年2組・4年3組"}, {"id": 29, "person": "細越 捺美", "block": "南校舎棟１F", "place": "多目的トイレ"}, {"id": 30, "person": "細越 捺美", "block": "南校舎棟１F", "place": "シャワー室"}, {"id": 31, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "小学部2年1組"}, {"id": 32, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "階段(理科室隣)"}, {"id": 33, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "個別学習室１（小学部）"}, {"id": 34, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "教材室１"}, {"id": 35, "person": "近藤 史隆", "block": "南校舎棟１F", "place": "体育館渡り廊下・ホール・トイレ"}, {"id": 36, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "生徒トイレ(男子)"}, {"id": 37, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "個別学習室２（高等部）"}, {"id": 38, "person": "菊池 健斗", "block": "南校舎棟１F", "place": "体育館"}, {"id": 39, "person": "菊池 健斗", "block": "屋外", "place": "グラウンド（遊具等）"}, {"id": 40, "person": "荒木 沙也香", "block": "南校舎棟１F", "place": "図工室（準備室）"}, {"id": 41, "person": "荒木 沙也香", "block": "南校舎棟２F", "place": "中学部３年１組"}, {"id": 42, "person": "竹澤 里栄", "block": "南校舎棟１F", "place": "理科室（準備室）"}, {"id": 43, "person": "竹澤 里栄", "block": "南校舎棟２F", "place": "図書室"}, {"id": 44, "person": "吉田 好子", "block": "南校舎棟１F", "place": "児童生徒トイレ(女子)"}, {"id": 45, "person": "吉田 好子", "block": "南校舎棟１F", "place": "プレイルーム・ホール・渡り廊下"}, {"id": 46, "person": "高橋 天地", "block": "南校舎棟１F", "place": "職員更衣室(男)"}, {"id": 47, "person": "高橋 天地", "block": "南校舎棟２F", "place": "中学部１年１組"}, {"id": 48, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "職員トイレ(女)"}, {"id": 49, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "テラス"}, {"id": 50, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "児童生徒昇降口・ポーチ"}, {"id": 51, "person": "臼澤 育子", "block": "南校舎棟１F", "place": "給食配膳室"}, {"id": 52, "person": "千田 一輝", "block": "北校舎棟１F", "place": "高等部工芸室"}, {"id": 53, "person": "千田 一輝", "block": "北校舎棟２F", "place": "高等部３年１組"}, {"id": 54, "person": "千葉 登志美", "block": "北校舎棟１F", "place": "高等部紙工室"}, {"id": 55, "person": "千葉 登志美", "block": "北校舎棟２F", "place": "生徒更衣室(女)"}, {"id": 56, "person": "阿部 良利", "block": "北校舎棟１F", "place": "高等部作業室"}, {"id": 57, "person": "阿部 良利", "block": "北校舎棟２F", "place": "生徒トイレ(男子)"}, {"id": 58, "person": "城内 美沙", "block": "北校舎棟１F", "place": "家庭科室（準備室・作法室）"}, {"id": 59, "person": "城内 美沙", "block": "南校舎棟２F", "place": "中学部調理室（準備室）"}, {"id": 60, "person": "古戸 優望", "block": "北校舎棟１F", "place": "階段(トイレ前)"}, {"id": 61, "person": "古戸 優望", "block": "北校舎棟２F", "place": "高等部２年２組"}, {"id": 62, "person": "福士 優", "block": "北校舎棟１F", "place": "生徒トイレ(女子)"}, {"id": 63, "person": "福士 優", "block": "北校舎棟２F", "place": "職員トイレ(女)"}, {"id": 64, "person": "高橋 珠", "block": "北校舎棟１F", "place": "多目的トイレ"}, {"id": 65, "person": "高橋 珠", "block": "北校舎棟１F", "place": "シャワー室"}, {"id": 66, "person": "畠山 麻優香", "block": "北校舎棟１F", "place": "廊下・プール渡り廊下"}, {"id": 67, "person": "畠山 麻優香", "block": "北校舎棟２F", "place": "高等部1年1組"}, {"id": 68, "person": "工藤 柊", "block": "北校舎棟１F", "place": "プール"}, {"id": 69, "person": "工藤 柊", "block": "南校舎棟２F", "place": "中学部２年１組"}, {"id": 70, "person": "阿部 藍", "block": "北校舎棟１F", "place": "高等部２年３組"}, {"id": 71, "person": "阿部 藍", "block": "北校舎棟１F", "place": "個別学習室１（高等部）"}, {"id": 72, "person": "那須 星香", "block": "南校舎棟２F", "place": "中学部２年２組"}, {"id": 73, "person": "那須 星香", "block": "南校舎棟２F", "place": "多目的トイレ"}, {"id": 74, "person": "那須 星香", "block": "南校舎棟２F", "place": "シャワー室"}, {"id": 75, "person": "志田 望", "block": "南校舎棟２F", "place": "中学部紙工室（準備室）"}, {"id": 76, "person": "志田 望", "block": "南校舎棟２F", "place": "児童生徒トイレ(男子)"}, {"id": 77, "person": "志田 望", "block": "南校舎棟２F", "place": "生徒更衣室(男子)"}, {"id": 78, "person": "村上 綾", "block": "南校舎棟２F", "place": "教材室２"}, {"id": 79, "person": "村上 綾", "block": "南校舎棟２F", "place": "個別学習室１(中学部)"}, {"id": 80, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "個別学習室２(中学部)"}, {"id": 81, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "廊下(教材室～音楽室)"}, {"id": 82, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "個別学習室２（小学部）"}, {"id": 83, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "屋外階段１・避難滑り台"}, {"id": 84, "person": "中家 夏海", "block": "南校舎棟２F", "place": "小学部4年1組"}, {"id": 85, "person": "中家 夏海", "block": "南校舎棟２F", "place": "音楽室（準備室）"}, {"id": 86, "person": "久保 美紀", "block": "南校舎棟２F", "place": "小学部３年１組"}, {"id": 87, "person": "久保 美紀", "block": "南校舎棟２F", "place": "廊下(渡り廊下～北校舎階段横廊下)"}, {"id": 88, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "小学部4年2組・5年1組・6年1組"}, {"id": 89, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "バルコニー"}, {"id": 90, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "児童生徒トイレ(女子)"}, {"id": 91, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "生徒更衣室(女子)"}, {"id": 92, "person": "柏山 典子", "block": "北校舎棟２F", "place": "高等部２年1組"}, {"id": 93, "person": "柏山 典子", "block": "北校舎棟２F", "place": "教材室４"}, {"id": 94, "person": "千葉 智子", "block": "北校舎棟２F", "place": "職員室(高)"}, {"id": 95, "person": "千葉 智子", "block": "北校舎棟２F", "place": "湯沸室"}, {"id": 96, "person": "中條 広一", "block": "北校舎棟２F", "place": "屋外階段２"}, {"id": 97, "person": "中條 広一", "block": "北校舎棟２F", "place": "廊下(職員室前～生徒用トイレ前)"}, {"id": 98, "person": "新沼 千明", "block": "北校舎棟２F", "place": "生徒トイレ(女子)"}, {"id": 99, "person": "新沼 千明", "block": "北校舎棟２F", "place": "多目的トイレ"}, {"id": 100, "person": "新沼 千明", "block": "北校舎棟２F", "place": "シャワー室"}, {"id": 101, "person": "新沼 千明", "block": "屋外", "place": "部室棟"}, {"id": 102, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "職員トイレ(男)"}, {"id": 103, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "生徒更衣室(男)"}, {"id": 104, "person": "太田 綾", "block": "釜石病院校舎", "place": "学習室１"}, {"id": 105, "person": "太田 綾", "block": "釜石病院校舎", "place": "洗面室"}, {"id": 106, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "学習室２"}, {"id": 107, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "男子トイレ・シャワー室"}, {"id": 108, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "階段"}, {"id": 109, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "学習室３"}, {"id": 110, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "教材室"}, {"id": 111, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "女子トイレ"}];
-const PERSONS = ["高橋 晃", "鈴木 野乃香", "細川 功", "玉山 幸平", "村上 みさと", "熊谷 美早紀", "菊池 いずみ", "伊藤 弘美", "星野 美和子", "村木 ゆき", "浅沼 樹", "湊 敬子", "細越 捺美", "大澤 美咲", "佐々木 尚子", "近藤 史隆", "菊池 健斗", "荒木 沙也香", "竹澤 里栄", "吉田 好子", "高橋 天地", "佐藤 暢子", "臼澤 育子", "千田 一輝", "千葉 登志美", "阿部 良利", "城内 美沙", "古戸 優望", "福士 優", "高橋 珠", "畠山 麻優香", "工藤 柊", "阿部 藍", "那須 星香", "志田 望", "村上 綾", "長野 和歌子", "岩渕 正子", "中家 夏海", "久保 美紀", "袴田 まどか", "千崎 友里子", "柏山 典子", "千葉 智子", "中條 広一", "新沼 千明", "斎藤 道幸", "太田 綾", "小水内 光浩", "小笠原 早苗"];
+const PERSONS_SEED = ["高橋 晃", "鈴木 野乃香", "細川 功", "玉山 幸平", "村上 みさと", "熊谷 美早紀", "菊池 いずみ", "伊藤 弘美", "星野 美和子", "村木 ゆき", "浅沼 樹", "湊 敬子", "細越 捺美", "大澤 美咲", "佐々木 尚子", "近藤 史隆", "菊池 健斗", "荒木 沙也香", "竹澤 里栄", "吉田 好子", "高橋 天地", "佐藤 暢子", "臼澤 育子", "千田 一輝", "千葉 登志美", "阿部 良利", "城内 美沙", "古戸 優望", "福士 優", "高橋 珠", "畠山 麻優香", "工藤 柊", "阿部 藍", "那須 星香", "志田 望", "村上 綾", "長野 和歌子", "岩渕 正子", "中家 夏海", "久保 美紀", "袴田 まどか", "千崎 友里子", "柏山 典子", "千葉 智子", "中條 広一", "新沼 千明", "斎藤 道幸", "太田 綾", "小水内 光浩", "小笠原 早苗"];
 const ITEMS = ["床の浮きや破損はないか", "床が滑りやすく、転倒の危険はないか", "棚の上から落ちそうな危険な物はないか／棚はきちんと固定されているか", "黒板・掲示物の取り付けは安全か", "天井・壁に破損はないか", "TV・教具等の備品設置場所は適切か", "窓やガラスがはずれやすくなっている箇所や破損はないか", "机・椅子・棚類の破損はないか", "敷居のレール及び戸や鍵は安全か", "通路や出入り口付近は歩きやすく安全か", "ベランダの破損や異状はないか", "非常時の退避口の状況はよいか", "手洗い場付近は清潔で安全か", "階段の手すりに異状はないか", "スイッチ・コンセント等に異状はないか", "照明及び電気器具に異状はないか", "暖房器具の破損、異状はないか", "ガスコンロ、湯沸かし器の異状、管の傷みはないか", "消火器の周りにじゃまなものはないか", "清掃用具置き場は整理され、衛生的か"];
 
 </script>
@@ -381,6 +385,20 @@ function nextFacilityId(){
   return mx+1;
 }
 
+/* ---- 先生の名簿管理 ----
+   PERSONS_SEED（HTML埋め込み）を初期値に、staff テーブルがあればそれを使う。
+   担当を持たない先生も名簿に登録できる。 */
+let STAFF = [...PERSONS_SEED];  // 名簿（名前の配列）
+let staffLoaded=false;
+async function loadStaff(){
+  staffLoaded=true;
+  if(!sb) return;
+  try{
+    const { data, error }=await sb.from("staff").select("name, sort_order").order("sort_order",{ascending:true});
+    if(!error && data && data.length){ STAFF = data.map(s=>s.name); }
+  }catch(e){ console.warn("staff読込",e); }
+}
+
 /* ---- 割当管理 ---- */
 let ASSIGN={}; let assignLoaded=false;
 function buildInitialAssign(){const a={};FACILITIES_SEED.forEach(f=>{if(f.person)a[f.id]=f.person;});return a;}
@@ -396,7 +414,15 @@ function personOf(fid){return ASSIGN[fid]||"";}
 function facilitiesOfPerson(person){return FACILITIES.filter(f=>personOf(f.id)===person);}
 function activePersons(){
   const set=new Set();Object.values(ASSIGN).forEach(p=>{if(p)set.add(p);});
-  const ordered=[];PERSONS.forEach(p=>{if(set.has(p)){ordered.push(p);set.delete(p);}});
+  const ordered=[];STAFF.forEach(p=>{if(set.has(p)){ordered.push(p);set.delete(p);}});
+  [...set].forEach(p=>ordered.push(p));return ordered;
+}
+// 名簿全体（担当の有無に関わらず、登録された全先生）
+function allStaff(){
+  const set=new Set(STAFF);
+  // 割当にいるが名簿にない人も拾う（取りこぼし防止）
+  Object.values(ASSIGN).forEach(p=>{if(p)set.add(p);});
+  const ordered=[];STAFF.forEach(p=>{if(set.has(p)){ordered.push(p);set.delete(p);}});
   [...set].forEach(p=>ordered.push(p));return ordered;
 }
 
@@ -430,7 +456,7 @@ function onMonthChange(key){ setMonth(key); }
 async function goRegister(){state.screen="register";state.regPerson=null;state.regSel=new Set();if(!assignLoaded)await loadAssignments();render();}
 function renderRegister(){
   if(!state.regPerson){
-    const list=PERSONS.map(p=>{const cnt=facilitiesOfPerson(p).length;
+    const list=STAFF.map(p=>{const cnt=facilitiesOfPerson(p).length;
       return `<button class="pick" onclick="regPickPerson('${esc(p)}')"><span>${esc(p)}</span>
         <span class="meta">${cnt>0?cnt+"か所 登録済み":"未登録"} <span class="chev">›</span></span></button>`;}).join("");
     app.innerHTML=`
@@ -462,9 +488,9 @@ function renderRegister(){
   <div class="submitbar"><div class="submit-meta">${state.regSel.size} か所を選択中</div>
     <button class="submit" onclick="regSave()">この内容で担当を登録する</button></div>`;
 }
-function regFilter(q){q=q.trim();document.getElementById("rlist").innerHTML=PERSONS.filter(p=>!q||p.includes(q)).map(p=>{const cnt=facilitiesOfPerson(p).length;return `<button class="pick" onclick="regPickPerson('${esc(p)}')"><span>${esc(p)}</span><span class="meta">${cnt>0?cnt+"か所 登録済み":"未登録"} <span class="chev">›</span></span></button>`;}).join("")||`<div class="empty">見つかりません</div>`;}
+function regFilter(q){q=q.trim();document.getElementById("rlist").innerHTML=STAFF.filter(p=>!q||p.includes(q)).map(p=>{const cnt=facilitiesOfPerson(p).length;return `<button class="pick" onclick="regPickPerson('${esc(p)}')"><span>${esc(p)}</span><span class="meta">${cnt>0?cnt+"か所 登録済み":"未登録"} <span class="chev">›</span></span></button>`;}).join("")||`<div class="empty">見つかりません</div>`;}
 function regPickPerson(p){state.regPerson=p;state.regSel=new Set(facilitiesOfPerson(p).map(f=>f.id));render();}
-function regNewPerson(){const name=prompt("追加する先生の名前を入力してください（姓と名の間にスペース）");if(name&&name.trim()){state.regPerson=name.trim();state.regSel=new Set();render();}}
+function regNewPerson(){const name=prompt("追加する先生の名前を入力してください（姓と名の間にスペース）");if(name&&name.trim()){const nm=name.trim();state.regPerson=nm;state.regSel=new Set();if(!STAFF.includes(nm)){STAFF.push(nm);if(sb){sb.from("staff").upsert({name:nm,sort_order:STAFF.length},{onConflict:"name"}).then(()=>{}).catch(()=>{});}}render();}}
 function regBackToPersons(){state.regPerson=null;state.regSel=new Set();render();}
 function regToggle(fid){if(state.regSel.has(fid))state.regSel.delete(fid);else state.regSel.add(fid);render();}
 async function regSave(){
@@ -682,6 +708,7 @@ function renderTeacher(){
       <select class="month-select" onchange="onTeacherMonthChange(this.value)">${monthOpts}</select>
     </div>
     <button class="manage-fac-btn" onclick="goFacilityManage()">🏫 施設の管理（名前変更・追加・削除）</button>
+    <button class="manage-fac-btn person" onclick="goPersonManage()">🧑‍🏫 担当の先生の管理（転勤・名前変更）</button>
     <div class="statrow"><div class="stat bad"><div class="n">${badN}</div><div class="l">要修繕</div></div>
       <div class="stat"><div class="n" style="color:#b5790a">${warnN}</div><div class="l">要注意</div></div>
       <div class="stat ok"><div class="n">${doneFac}<span style="font-size:15px;color:#aeb6c0">/${totalFac}</span></div><div class="l">点検済み</div></div></div>
@@ -816,6 +843,178 @@ async function deleteFacility(fid,place){
   render();
 }
 
+/* ---- 担当の先生の管理（追加・削除・引き継ぎ・名前修正） ---- */
+async function goPersonManage(){
+  await loadFacilities();
+  if(!staffLoaded) await loadStaff();
+  if(!assignLoaded) await loadAssignments();
+  state.screen="personManage"; render();
+}
+function renderPersonManage(){
+  const persons=allStaff();
+  let html="";
+  if(!persons.length){
+    html=`<div class="empty">まだ先生が登録されていません。<br>下の「＋ 先生を追加する」から登録してください。</div>`;
+  } else {
+    html=persons.map(p=>{
+      const list=facilitiesOfPerson(p);
+      const facText = list.length ? `${list.length}か所：${list.map(f=>esc(f.place)).join("・")}` : "担当なし";
+      return `<div class="fac-manage-row">
+        <div class="fmr-main"><div class="fp">${esc(p)}</div>
+          <div class="fb">${facText}</div></div>
+        <div class="fmr-acts">
+          <button class="act edit" onclick="openPersonRename('${esc(p)}')">名前変更</button>
+          <button class="act swap" onclick="openPersonSwap('${esc(p)}')">引き継ぎ</button>
+          <button class="act del" onclick="deletePerson('${esc(p)}')">削除</button>
+        </div></div>`;
+    }).join("");
+  }
+  app.innerHTML=`${topbar("担当の先生の管理",`${persons.length}人`,"goTeacher")}
+  <div class="screen">
+    <div class="setup-warn" style="background:#eef3f9;border-color:#cdddf0;color:#2b4a6b">
+      <b>名前変更</b>＝名前を直す（誤字修正）。<b>引き継ぎ</b>＝転勤などで担当を別の先生にまるごと渡す。<b>削除</b>＝名簿から消す（担当があるときは先に引き継いでください）。
+    </div>
+    <button class="manage-fac-btn person" onclick="openPersonAdd()">＋ 先生を追加する</button>
+    ${html}
+  </div>`;
+}
+// 先生の追加
+function openPersonAdd(){
+  personEditCtx={mode:"add"};
+  const modal=document.createElement("div");
+  modal.className="modal-bg"; modal.id="personModal";
+  modal.innerHTML=`<div class="modal">
+    <div class="modal-h">先生を追加</div>
+    <div class="modal-sub">名簿に新しい先生を加えます。<br>担当の割り当ては、あとで「担当の登録・変更」からできます。</div>
+    <label class="mlabel">先生の名前</label>
+    <input class="search" id="person-addname" placeholder="例：佐藤 太郎（姓と名の間にスペース）">
+    <div class="modal-btns">
+      <button class="mbtn mcancel" onclick="closePersonModal()">キャンセル</button>
+      <button class="mbtn msave" onclick="savePersonAdd()">追加</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+async function savePersonAdd(){
+  const name=document.getElementById("person-addname").value.trim();
+  if(!name){ toast("名前を入れてください"); return; }
+  if(STAFF.includes(name)){ toast("その名前はすでに登録されています"); return; }
+  STAFF.push(name);
+  if(sb){
+    try{
+      const sort=STAFF.length;
+      const {error}=await sb.from("staff").upsert({name,sort_order:sort},{onConflict:"name"});
+      if(error)throw error;
+    }catch(e){ console.error(e); toast("追加の保存に失敗しました"); return; }
+  }
+  toast("先生を追加しました");
+  closePersonModal(); render();
+}
+// 先生の削除
+async function deletePerson(name){
+  const list=facilitiesOfPerson(name);
+  if(list.length){
+    alert(`「${name}」は${list.length}か所を担当しています。\n先に「引き継ぎ」で担当を別の先生に渡してから削除してください。`);
+    return;
+  }
+  if(!confirm(`「${name}」を名簿から削除します。よろしいですか？`)) return;
+  STAFF=STAFF.filter(p=>p!==name);
+  if(sb){
+    try{ const {error}=await sb.from("staff").delete().eq("name",name); if(error)throw error; }
+    catch(e){ console.error(e); toast("削除に失敗しました"); return; }
+  }
+  toast("先生を削除しました");
+  render();
+}
+// 名前の個別修正
+let personEditCtx=null;
+function openPersonRename(oldName){
+  personEditCtx={mode:"rename",oldName};
+  const modal=document.createElement("div");
+  modal.className="modal-bg"; modal.id="personModal";
+  modal.innerHTML=`<div class="modal">
+    <div class="modal-h">先生の名前を変更</div>
+    <div class="modal-sub">「${esc(oldName)}」の名前を直します。<br>この先生の担当施設はそのまま引き継がれます。</div>
+    <label class="mlabel">新しい名前</label>
+    <input class="search" id="person-newname" value="${esc(oldName)}" placeholder="姓と名の間にスペース">
+    <div class="modal-btns">
+      <button class="mbtn mcancel" onclick="closePersonModal()">キャンセル</button>
+      <button class="mbtn msave" onclick="savePersonRename()">保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+// 転勤の引き継ぎ
+function openPersonSwap(oldName){
+  personEditCtx={mode:"swap",oldName};
+  const modal=document.createElement("div");
+  modal.className="modal-bg"; modal.id="personModal";
+  const list=facilitiesOfPerson(oldName);
+  modal.innerHTML=`<div class="modal">
+    <div class="modal-h">担当を引き継ぐ</div>
+    <div class="modal-sub">「${esc(oldName)}」の担当（${list.length}か所）を、<br>下に入れた先生にまるごと引き継ぎます。</div>
+    <label class="mlabel">引き継ぐ先生（後任）の名前</label>
+    <input class="search" id="person-successor" placeholder="例：佐藤 太郎">
+    <div class="swap-note">引き継ぐ施設：${list.map(f=>esc(f.place)).join("・")}</div>
+    <div class="modal-btns">
+      <button class="mbtn mcancel" onclick="closePersonModal()">キャンセル</button>
+      <button class="mbtn msave" onclick="savePersonSwap()">引き継ぐ</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function closePersonModal(){const m=document.getElementById("personModal");if(m)m.remove();personEditCtx=null;}
+async function applyPersonChange(oldName,newName){
+  // ASSIGNの該当者を全て付け替え
+  const changed=[];
+  Object.keys(ASSIGN).forEach(fid=>{ if(ASSIGN[fid]===oldName){ ASSIGN[fid]=newName; changed.push(parseInt(fid)); } });
+  // 名簿STAFFも更新（rename）または後任を追加（swap）
+  const idx=STAFF.indexOf(oldName);
+  if(personEditCtx && personEditCtx.mode==="rename"){
+    if(idx>=0) STAFF[idx]=newName; else if(!STAFF.includes(newName)) STAFF.push(newName);
+  } else { // swap: 旧担当を名簿から外し、後任を加える
+    if(idx>=0) STAFF.splice(idx,1);
+    if(!STAFF.includes(newName)) STAFF.push(newName);
+  }
+  if(sb){
+    const rows=changed.map(fid=>{const f=FACILITIES.find(x=>x.id===fid)||{};return {facility_id:fid,place:f.place||"",block:f.block||"",person:newName};});
+    if(rows.length){ const {error}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"}); if(error)throw error; }
+    // 名簿テーブルも更新
+    try{
+      if(personEditCtx && personEditCtx.mode==="rename"){
+        await sb.from("staff").delete().eq("name",oldName);
+        await sb.from("staff").upsert({name:newName,sort_order:STAFF.indexOf(newName)+1},{onConflict:"name"});
+      } else {
+        await sb.from("staff").delete().eq("name",oldName);
+        await sb.from("staff").upsert({name:newName,sort_order:STAFF.indexOf(newName)+1},{onConflict:"name"});
+      }
+    }catch(e){ console.warn("staff更新",e); }
+  }
+  return changed.length;
+}
+async function savePersonRename(){
+  const newName=document.getElementById("person-newname").value.trim();
+  if(!newName){ toast("名前を入れてください"); return; }
+  const oldName=personEditCtx.oldName;
+  if(newName===oldName){ closePersonModal(); return; }
+  try{
+    const n=await applyPersonChange(oldName,newName);
+    toast(`名前を変更しました（${n}か所）`);
+    closePersonModal(); render();
+  }catch(e){ console.error(e); toast("変更の保存に失敗しました"); }
+}
+async function savePersonSwap(){
+  const successor=document.getElementById("person-successor").value.trim();
+  if(!successor){ toast("引き継ぐ先生の名前を入れてください"); return; }
+  const oldName=personEditCtx.oldName;
+  if(successor===oldName){ closePersonModal(); return; }
+  try{
+    const n=await applyPersonChange(oldName,successor);
+    toast(`${oldName}の担当を${successor}に引き継ぎました（${n}か所）`);
+    closePersonModal(); render();
+  }catch(e){ console.error(e); toast("引き継ぎの保存に失敗しました"); }
+}
+
 /* ---- 対応記録モーダル ---- */
 let repairCtx=null;
 function openRepair(fid,idx,place,item){
@@ -876,9 +1075,9 @@ function goFacilityList(){state.screen="facilityList";render();}
 function render(){
   // 点検入力中は全体再描画でのスクロールリセットをしない（部分更新で対応するため）
   if(state.screen!=="inspect") window.scrollTo(0,0);
-  switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();case "facManage":return renderFacManage();}
+  switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();case "facManage":return renderFacManage();case "personManage":return renderPersonManage();}
 }
-(async()=>{await loadFacilities();await loadAssignments();render();})();
+(async()=>{await loadFacilities();await loadStaff();await loadAssignments();render();})();
 
 </script>
 </body>
