@@ -233,6 +233,61 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 }
 .tabs{flex-wrap:nowrap;}
 .tab{padding:9px 6px; font-size:12px;}
+
+/* 月選択 */
+.month-picker{margin-bottom:16px;}
+.month-picker label{display:block; font-size:12px; font-weight:700; color:#8893a2; margin:0 4px 6px;}
+.month-picker.compact{margin-bottom:12px;}
+.month-select{
+  width:100%; padding:13px 16px; font-size:16px; font-weight:600; color:var(--ink);
+  border:1.5px solid var(--line); border-radius:12px; background:#fff;
+  -webkit-appearance:none; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238893a2' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 16px center;
+}
+.month-select:focus{outline:none; border-color:var(--accent);}
+
+/* 提出済みカード（修正・取り消し） */
+.fac-card{background:#fff; border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow); overflow:hidden; border:1.5px solid var(--line);}
+.fac-main{width:100%; display:flex; align-items:center; justify-content:space-between; padding:16px 18px; background:none; font-size:17px; font-weight:600; color:var(--ink);}
+.fac-actions{display:flex; border-top:1px solid var(--line);}
+.fac-actions .act{flex:1; padding:11px; font-size:13.5px; font-weight:700; background:none;}
+.fac-actions .act.edit{color:var(--accent); border-right:1px solid var(--line);}
+.fac-actions .act.del{color:var(--bad);}
+.fac-actions .act:active{background:#f7f8fa;}
+
+/* 編集中の注記 */
+.edit-note{font-size:12.5px; color:#b5790a; background:var(--warnbg); padding:8px 11px; border-radius:8px; margin-top:10px; font-weight:600;}
+
+/* 対応記録ボックス */
+.repair-add{width:100%; margin-top:11px; padding:11px; border-radius:10px; border:1.5px dashed var(--accent); color:var(--accent); background:#f4f8fc; font-size:13.5px; font-weight:700;}
+.repair-add:active{background:#e9f1f9;}
+.repair-box{margin-top:11px; padding:11px 13px; border-radius:10px;}
+.repair-box.rprog{background:#fff7e8; border:1.5px solid #f0dca8;}
+.repair-box.rdone{background:#eef7f1; border:1.5px solid #b8ddc5;}
+.repair-box .rhead{display:flex; justify-content:space-between; align-items:center;}
+.repair-box .rstatus{font-size:13px; font-weight:800;}
+.repair-box.rprog .rstatus{color:#b5790a;}
+.repair-box.rdone .rstatus{color:var(--ok);}
+.repair-box .redit{font-size:12px; font-weight:700; color:var(--accent); background:none; padding:3px 6px;}
+.repair-box .rnote{font-size:13px; color:#3a4451; margin-top:6px; line-height:1.5;}
+.repair-box .rmeta{font-size:11.5px; color:#8893a2; margin-top:6px; font-weight:600;}
+
+/* モーダル */
+.modal-bg{position:fixed; inset:0; background:rgba(20,28,42,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; padding:0;}
+.modal{background:#fff; width:100%; max-width:560px; border-radius:20px 20px 0 0; padding:22px 20px calc(env(safe-area-inset-bottom) + 22px); box-shadow:0 -4px 24px rgba(0,0,0,.2); max-height:88vh; overflow-y:auto;}
+.modal-h{font-size:18px; font-weight:800; margin-bottom:6px;}
+.modal-sub{font-size:13px; color:#56616f; margin-bottom:16px; line-height:1.5;}
+.modal-sub span{color:#8893a2; font-size:12.5px;}
+.mlabel{display:block; font-size:12.5px; font-weight:700; color:#56616f; margin:14px 4px 7px;}
+.mcheck{display:flex; align-items:center; gap:9px; margin-top:16px; font-size:14.5px; font-weight:600; color:var(--ink);}
+.mcheck input{width:22px; height:22px; accent-color:var(--ok);}
+.modal-btns{display:flex; gap:9px; margin-top:22px; flex-wrap:wrap;}
+.mbtn{flex:1; min-width:90px; padding:14px; border-radius:11px; font-size:15px; font-weight:700;}
+.mbtn.msave{background:var(--ok); color:#fff;}
+.mbtn.mcancel{background:#eef1f5; color:#56616f;}
+.mbtn.mdel{background:#fbe7e5; color:var(--bad); flex-basis:100%;}
+.mbtn:active{transform:scale(.98);}
 </style>
 </head>
 <body>
@@ -269,8 +324,21 @@ try {
 } catch (e) { console.warn("Supabase未接続", e); }
 
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
-const MONTH = currentMonthKey();
-const MONTH_LABEL = (()=>{const [y,m]=MONTH.split("-");return `${y}年${parseInt(m)}月`;})();
+function monthLabel(key){const [y,m]=key.split("-");return `${y}年${parseInt(m)}月`;}
+// 選択中の月（最初は今月）。点検も閲覧もこの月で動く
+let MONTH = currentMonthKey();
+let MONTH_LABEL = monthLabel(MONTH);
+function setMonth(key){ MONTH=key; MONTH_LABEL=monthLabel(key); }
+// 月の選択肢: 今月から過去24か月＋翌月まで
+function monthOptions(){
+  const opts=[]; const d=new Date(); d.setDate(1);
+  d.setMonth(d.getMonth()+1); // 翌月まで選べる
+  for(let i=0;i<26;i++){
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    opts.push(key); d.setMonth(d.getMonth()-1);
+  }
+  return opts;
+}
 
 const app=document.getElementById("app");
 const toastEl=document.getElementById("toast");
@@ -303,9 +371,14 @@ function topbar(title,sub,backFn){return `<div class="topbar">${backFn?`<button 
 
 /* ---- ホーム ---- */
 function renderHome(){
+  const opts=monthOptions().map(k=>`<option value="${k}" ${k===MONTH?"selected":""}>${monthLabel(k)}</option>`).join("");
   app.innerHTML=`
-  ${topbar("安全点検", MONTH_LABEL+" 点検")}
+  ${topbar("安全点検", "点検する月を選べます")}
   <div class="screen">
+    <div class="month-picker">
+      <label>点検・確認する月</label>
+      <select class="month-select" onchange="onMonthChange(this.value)">${opts}</select>
+    </div>
     <p class="lead">使う操作を選んでください。</p>
     <button class="home-card" onclick="goPersonSelect()"><div class="ic t">📋</div>
       <div><div class="ht">点検する（担当の先生）</div><div class="hd">自分の名前を選んで点検します</div></div></button>
@@ -316,6 +389,7 @@ function renderHome(){
     ${ sb?"":`<div class="setup-warn" style="margin-top:20px"><b>準備中：</b> いまは保存先（Supabase）が未設定です。操作は試せますが保存されません。app.js の <b>SUPABASE_ANON_KEY</b> を設定すると保存できます。</div>`}
   </div>`;
 }
+function onMonthChange(key){ setMonth(key); }
 
 /* ---- 担当登録 ---- */
 async function goRegister(){state.screen="register";state.regPerson=null;state.regSel=new Set();if(!assignLoaded)await loadAssignments();render();}
@@ -384,42 +458,119 @@ function selectPerson(p){state.person=p;state.screen="facilityList";loadSubmitte
 async function loadSubmittedForPerson(person){state.submittedThisMonth=new Set();if(!sb)return;try{const ids=facilitiesOfPerson(person).map(f=>f.id);if(!ids.length)return;const{data,error}=await sb.from("inspections").select("facility_id").eq("month",MONTH).in("facility_id",ids);if(!error&&data)data.forEach(r=>state.submittedThisMonth.add(r.facility_id));}catch(e){console.warn(e);}}
 function renderFacilityList(){
   const list=facilitiesOfPerson(state.person);const byBlock={};list.forEach(f=>{(byBlock[f.block]=byBlock[f.block]||[]).push(f);});
-  let html="";Object.keys(byBlock).forEach(block=>{html+=`<div class="block-label">${esc(block)}</div>`;byBlock[block].forEach(f=>{const done=state.submittedThisMonth.has(f.id);html+=`<button class="pick" onclick="startInspect(${f.id})"><span>${esc(f.place)}</span><span class="badge ${done?"done":"todo"}">${done?"提出済み":"未点検"}</span></button>`;});});
+  let html="";Object.keys(byBlock).forEach(block=>{
+    html+=`<div class="block-label">${esc(block)}</div>`;
+    byBlock[block].forEach(f=>{
+      const done=state.submittedThisMonth.has(f.id);
+      if(done){
+        html+=`<div class="fac-card done-card">
+          <button class="fac-main" onclick="startInspect(${f.id})">
+            <span class="fp">${esc(f.place)}</span>
+            <span class="badge done">提出済み</span></button>
+          <div class="fac-actions">
+            <button class="act edit" onclick="startInspect(${f.id})">修正する</button>
+            <button class="act del" onclick="deleteInspection(${f.id},'${esc(f.place)}')">点検を取り消す</button>
+          </div></div>`;
+      } else {
+        html+=`<button class="pick" onclick="startInspect(${f.id})"><span>${esc(f.place)}</span><span class="badge todo">未点検</span></button>`;
+      }
+    });
+  });
   const doneCount=list.filter(f=>state.submittedThisMonth.has(f.id)).length;
   app.innerHTML=`${topbar(esc(state.person)+" さん",`${MONTH_LABEL}　${doneCount}/${list.length} か所 提出済み`,"goPersonSelect")}
-  <div class="screen"><p class="lead">点検する場所を選んでください。提出後でも開いて出し直せます。</p>
+  <div class="screen"><p class="lead">点検する場所を選んでください。提出済みは「修正」や「取り消し」ができます。</p>
     ${html||`<div class="empty">担当の場所がありません。「担当の登録・変更」で登録してください。</div>`}</div>`;
+}
+async function deleteInspection(fid,place){
+  if(!confirm(`「${place}」の${MONTH_LABEL}の点検を取り消します。よろしいですか？\n（記録が削除され、未点検に戻ります）`)) return;
+  if(!sb){ state.submittedThisMonth.delete(fid); toast("取り消しました（保存先未設定）"); render(); return; }
+  try{
+    const { error }=await sb.from("inspections").delete().eq("facility_id",fid).eq("month",MONTH);
+    if(error) throw error;
+    state.submittedThisMonth.delete(fid);
+    toast("点検を取り消しました");
+    render();
+  }catch(e){ console.error(e); toast("取り消しに失敗しました。電波を確認してください"); }
 }
 function startInspect(fid){state.facility=FACILITIES.find(f=>f.id===fid);state.answers={};state.screen="inspect";loadExisting(fid).then(render);}
 async function loadExisting(fid){if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("facility_id",fid).eq("month",MONTH).maybeSingle();if(!error&&data&&data.answers){const a=typeof data.answers==="string"?JSON.parse(data.answers):data.answers;Object.keys(a).forEach(k=>{state.answers[k]={mark:a[k].mark,note:a[k].note||"",photos:(a[k].photos||[]).map(u=>({url:u,uploaded:true}))};});}}catch(e){console.warn(e);}}
 const MARKS=[{key:"ok",sym:"〇",cap:"異常なし",cls:"sel-ok"},{key:"na",sym:"／",cap:"設備なし",cls:"sel-na"},{key:"warn",sym:"△",cap:"要注意",cls:"sel-warn"},{key:"bad",sym:"×",cap:"要修繕",cls:"sel-bad"}];
+function photoZoneHTML(i,ans){
+  const thumbs=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}"><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
+  return `<div class="photo-zone"><div class="hint">${ans.mark==="bad"?"要修繕です。写真を撮って記録しましょう。":"気になる点です。写真があると伝わりやすいです。"}</div>
+    <button class="shoot" onclick="document.getElementById('cam${i}').click()">📷 写真を撮る・選ぶ</button>
+    <input type="file" id="cam${i}" accept="image/*" capture="environment" multiple style="display:none" onchange="addPhoto(${i},this)">
+    <div class="thumbs">${thumbs}</div>
+    <textarea class="note-input" placeholder="状態・場所をメモ（任意）" oninput="setNote(${i},this.value)">${esc(ans.note||"")}</textarea></div>`;
+}
 function renderInspect(){
   const f=state.facility;
   const cards=ITEMS.map((it,i)=>{
     const ans=state.answers[i]||{};const need=ans.mark==="bad"||ans.mark==="warn";
     const cardCls=ans.mark==="bad"?"answered-bad":ans.mark==="warn"?"answered-warn":"";
     const choices=MARKS.map(m=>{const sel=ans.mark===m.key?m.cls:"";return `<button class="choice ${sel}" onclick="setMark(${i},'${m.key}')"><span class="sym">${m.sym}</span><span class="cap">${m.cap}</span></button>`;}).join("");
-    let pz="";
-    if(need){const thumbs=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}"><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
-      pz=`<div class="photo-zone"><div class="hint">${ans.mark==="bad"?"要修繕です。写真を撮って記録しましょう。":"気になる点です。写真があると伝わりやすいです。"}</div>
-        <button class="shoot" onclick="document.getElementById('cam${i}').click()">📷 写真を撮る・選ぶ</button>
-        <input type="file" id="cam${i}" accept="image/*" capture="environment" multiple style="display:none" onchange="addPhoto(${i},this)">
-        <div class="thumbs">${thumbs}</div>
-        <textarea class="note-input" placeholder="状態・場所をメモ（任意）" oninput="setNote(${i},this.value)">${esc(ans.note||"")}</textarea></div>`;}
+    const pz= need ? photoZoneHTML(i,ans) : "";
     return `<div class="qcard ${cardCls}" id="q${i}"><div class="qnum">No.${i+1}</div><div class="qtext">${esc(it)}</div><div class="choices">${choices}</div>${pz}</div>`;
   }).join("");
   const answered=Object.keys(state.answers).filter(k=>state.answers[k].mark).length;const pct=Math.round(answered/ITEMS.length*100);
+  const editing = state.submittedThisMonth.has(f.id);
   app.innerHTML=`${topbar(esc(f.place),esc(f.block)+" ・ "+esc(state.person),"goFacilityList")}
   <div class="screen" style="padding-bottom:8px"><div class="facility-head"><div class="place">${esc(f.place)}</div>
     <div class="info">${esc(f.block)}　/　担当：${esc(state.person)}　/　${MONTH_LABEL}</div>
+    ${editing?`<div class="edit-note">提出済みの内容を修正できます。直したら、もう一度提出してください。</div>`:""}
     <div class="progress"><i id="pbar" style="width:${pct}%"></i></div></div>${cards}</div>
   <div class="submitbar"><div class="submit-meta">${answered}/${ITEMS.length} 項目を入力済み</div>
-    <button class="submit" id="sbtn" onclick="submitInspection()" ${answered<ITEMS.length?"disabled":""}>✓ この場所の点検を提出する</button></div>`;
+    <button class="submit" id="sbtn" onclick="submitInspection()" ${answered<ITEMS.length?"disabled":""}>${editing?"✓ 修正した内容で出し直す":"✓ この場所の点検を提出する"}</button></div>`;
 }
-function setMark(i,key){const a=state.answers[i]||(state.answers[i]={photos:[],note:""});a.mark=key;render();const el=document.getElementById("q"+i);if(el)el.scrollIntoView({block:"nearest"});}
+function setMark(i,key){
+  const a=state.answers[i]||(state.answers[i]={photos:[],note:""});
+  const prevNeed=(a.mark==="bad"||a.mark==="warn");
+  a.mark=key;
+  const nowNeed=(key==="bad"||key==="warn");
+  // 選択肢の見た目だけ更新（スクロールを動かさない）
+  const card=document.getElementById("q"+i);
+  if(card){
+    card.querySelectorAll(".choice").forEach((btn,bi)=>{
+      const m=MARKS[bi];
+      btn.className="choice"+(key===m.key?(" "+m.cls):"");
+    });
+    card.classList.remove("answered-bad","answered-warn");
+    if(key==="bad")card.classList.add("answered-bad");
+    else if(key==="warn")card.classList.add("answered-warn");
+    // 写真ゾーンの有無が変わったときだけ、そのカードのゾーンを差し替え（全体再描画はしない）
+    if(prevNeed!==nowNeed){ updatePhotoZone(i); }
+  }
+  // 進捗バーと送信ボタンだけ更新
+  updateProgress();
+}
+// 指定カードの写真ゾーンを付け外し（スクロール維持）
+function updatePhotoZone(i){
+  const card=document.getElementById("q"+i);if(!card)return;
+  const ans=state.answers[i]||{};
+  const need=ans.mark==="bad"||ans.mark==="warn";
+  let zone=card.querySelector(".photo-zone");
+  if(!need){ if(zone)zone.remove(); return; }
+  const html=photoZoneHTML(i,ans);
+  if(zone){ zone.outerHTML=html; }
+  else { card.insertAdjacentHTML("beforeend", html); }
+}
+function updateProgress(){
+  const answered=Object.keys(state.answers).filter(k=>state.answers[k].mark).length;
+  const pct=Math.round(answered/ITEMS.length*100);
+  const bar=document.getElementById("pbar");if(bar)bar.style.width=pct+"%";
+  const meta=document.querySelector(".submit-meta");if(meta)meta.textContent=`${answered}/${ITEMS.length} 項目を入力済み`;
+  const btn=document.getElementById("sbtn");if(btn)btn.disabled=answered<ITEMS.length;
+}
 function setNote(i,v){if(state.answers[i])state.answers[i].note=v;}
-function delPhoto(i,pi){state.answers[i].photos.splice(pi,1);render();}
-function addPhoto(i,input){const files=[...input.files];if(!files.length)return;const a=state.answers[i];a.photos=a.photos||[];let pending=files.length;files.forEach(file=>compressImage(file,1280,0.72).then(d=>{a.photos.push({dataUrl:d,uploaded:false});if(--pending===0)render();}));input.value="";}
+function delPhoto(i,pi){state.answers[i].photos.splice(pi,1);refreshThumbs(i);}
+function addPhoto(i,input){const files=[...input.files];if(!files.length)return;const a=state.answers[i];a.photos=a.photos||[];let pending=files.length;files.forEach(file=>compressImage(file,1280,0.72).then(d=>{a.photos.push({dataUrl:d,uploaded:false});if(--pending===0)refreshThumbs(i);}));input.value="";}
+// サムネイル部分だけ更新（スクロール維持）
+function refreshThumbs(i){
+  const card=document.getElementById("q"+i);if(!card)return;
+  const cont=card.querySelector(".thumbs");if(!cont)return;
+  const ans=state.answers[i]||{};
+  cont.innerHTML=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}"><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
+}
 function compressImage(file,maxW,q){return new Promise(res=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{let{width,height}=img;if(width>maxW){height=Math.round(height*maxW/width);width=maxW;}const c=document.createElement("canvas");c.width=width;c.height=height;c.getContext("2d").drawImage(img,0,0,width,height);URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",q));};img.onerror=()=>{URL.revokeObjectURL(url);res(null);};img.src=url;});}
 function dataUrlToBlob(d){const[h,b]=d.split(",");const m=h.match(/:(.*?);/)[1];const bin=atob(b);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:m});}
 async function submitInspection(){
@@ -439,19 +590,47 @@ async function submitInspection(){
   }catch(e){console.error(e);toast("送信に失敗しました。電波を確認して再度お試しください");btn.disabled=false;btn.textContent="✓ この場所の点検を提出する";}
 }
 
-/* ---- 教師ダッシュボード（未割当タブ追加） ---- */
-async function goTeacher(){if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();render();}
+/* ---- 教師ダッシュボード（対応記録・履歴対応） ---- */
+let REPAIRS={}; // key: `${facility_id}_${itemIndex}` -> {status, note, person, updated_at}
+async function goTeacher(){if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();await loadRepairs();render();}
 async function loadAllRecords(){state.records=[];if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("month",MONTH);if(!error&&data)state.records=data.map(r=>({...r,answers:typeof r.answers==="string"?JSON.parse(r.answers):r.answers}));}catch(e){console.warn(e);}}
+async function loadRepairs(){
+  REPAIRS={}; if(!sb) return;
+  try{
+    const { data, error }=await sb.from("repairs").select("*").eq("month",MONTH);
+    if(!error&&data) data.forEach(r=>{ REPAIRS[`${r.facility_id}_${r.item_index}`]={status:r.status,note:r.note,person:r.person,updated_at:r.updated_at}; });
+  }catch(e){ console.warn("repairs読込",e); }
+}
+function repairOf(fid,idx){ return REPAIRS[`${fid}_${idx}`]||null; }
 function renderTeacher(){
   const recs=state.records;const submittedIds=new Set(recs.map(r=>r.facility_id));
   const totalFac=FACILITIES.length,doneFac=submittedIds.size;
   const unassigned=FACILITIES.filter(f=>!personOf(f.id));
-  const issues=[];recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{if(a[k].mark==="bad"||a[k].mark==="warn")issues.push({place:r.place,block:r.block,person:r.person,item:ITEMS[k],mark:a[k].mark,note:a[k].note,photos:a[k].photos||[]});});});
+  const issues=[];recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{if(a[k].mark==="bad"||a[k].mark==="warn")issues.push({fid:r.facility_id,idx:parseInt(k),place:r.place,block:r.block,person:r.person,item:ITEMS[k],mark:a[k].mark,note:a[k].note,photos:a[k].photos||[]});});});
   const badN=issues.filter(i=>i.mark==="bad").length,warnN=issues.filter(i=>i.mark==="warn").length;
   let body="";
   if(state.teacherTab==="issues"){
-    if(!issues.length)body=`<div class="empty">${sb?"今月の要修繕・要注意はまだありません":"保存先が未設定です"}</div>`;
-    else{issues.sort((a,b)=>(a.mark==="bad"?0:1)-(b.mark==="bad"?0:1));body=issues.map(is=>{const photos=(is.photos||[]).map(u=>`<a href="${u}" target="_blank"><img src="${u}"></a>`).join("");return `<div class="issue-card ${is.mark==="warn"?"warn":""}"><div class="ih"><div><div class="place">${esc(is.place)}</div><div class="who">${esc(is.block)} ・ ${esc(is.person)}</div></div><div class="jbadge ${is.mark}">${is.mark==="bad"?"× 要修繕":"△ 要注意"}</div></div><div class="item">${esc(is.item)}</div>${is.note?`<div class="note">${esc(is.note)}</div>`:""}${photos?`<div class="issue-photos">${photos}</div>`:""}</div>`;}).join("");}
+    if(!issues.length)body=`<div class="empty">${sb?MONTH_LABEL+"の要修繕・要注意はまだありません":"保存先が未設定です"}</div>`;
+    else{
+      issues.sort((a,b)=>(a.mark==="bad"?0:1)-(b.mark==="bad"?0:1));
+      body=issues.map(is=>{
+        const photos=(is.photos||[]).map(u=>`<a href="${u}" target="_blank"><img src="${u}"></a>`).join("");
+        const rep=repairOf(is.fid,is.idx);
+        let repBox;
+        if(rep && rep.status){
+          const done=rep.status==="done";
+          repBox=`<div class="repair-box ${done?"rdone":"rprog"}">
+            <div class="rhead"><span class="rstatus">${done?"✓ 対応済み":"対応中"}</span>
+              <button class="redit" onclick="openRepair(${is.fid},${is.idx},'${esc(is.place)}','${esc(is.item).replace(/'/g,"")}')">編集</button></div>
+            ${rep.note?`<div class="rnote">${esc(rep.note)}</div>`:""}
+            <div class="rmeta">対応：${esc(rep.person||"")}</div>
+          </div>`;
+        } else {
+          repBox=`<button class="repair-add" onclick="openRepair(${is.fid},${is.idx},'${esc(is.place)}','${esc(is.item).replace(/'/g,"")}')">＋ 対応を記録する</button>`;
+        }
+        return `<div class="issue-card ${is.mark==="warn"?"warn":""}"><div class="ih"><div><div class="place">${esc(is.place)}</div><div class="who">${esc(is.block)} ・ ${esc(is.person)}</div></div><div class="jbadge ${is.mark}">${is.mark==="bad"?"× 要修繕":"△ 要注意"}</div></div><div class="item">${esc(is.item)}</div>${is.note?`<div class="note">${esc(is.note)}</div>`:""}${photos?`<div class="issue-photos">${photos}</div>`:""}${repBox}</div>`;
+      }).join("");
+    }
   } else if(state.teacherTab==="facilities"){
     const byBlock={};FACILITIES.forEach(f=>{(byBlock[f.block]=byBlock[f.block]||[]).push(f);});
     body=Object.keys(byBlock).map(block=>{const rows=byBlock[block].map(f=>{const done=submittedIds.has(f.id);const rec=recs.find(r=>r.facility_id===f.id);const issue=rec&&rec.has_issue;const owner=personOf(f.id);const badge=!owner?`<span class="badge issue">未割当</span>`:!done?`<span class="badge todo">未点検</span>`:issue?`<span class="badge issue">要対応あり</span>`:`<span class="badge done">異常なし</span>`;return `<div class="fac-row"><div><div class="fp">${esc(f.place)}</div><div class="fb">${owner?esc(owner):"担当者なし"}</div></div>${badge}</div>`;}).join("");return `<div class="block-label">${esc(block)}</div>${rows}`;}).join("");
@@ -461,8 +640,12 @@ function renderTeacher(){
     if(!unassigned.length)body=`<div class="empty" style="color:var(--ok)">未割当の場所はありません。全施設に担当者がいます。</div>`;
     else{const byBlock={};unassigned.forEach(f=>{(byBlock[f.block]=byBlock[f.block]||[]).push(f);});body=`<div class="setup-warn">担当者がまだ決まっていない場所です。先生に「担当の登録・変更」から登録してもらってください。</div>`+Object.keys(byBlock).map(block=>{const rows=byBlock[block].map(f=>`<div class="fac-row"><div><div class="fp">${esc(f.place)}</div></div><span class="badge issue">未割当</span></div>`).join("");return `<div class="block-label">${esc(block)}</div>${rows}`;}).join("");}
   }
-  app.innerHTML=`${topbar("点検状況",MONTH_LABEL,"goHome")}
+  const monthOpts=monthOptions().map(k=>`<option value="${k}" ${k===MONTH?"selected":""}>${monthLabel(k)}</option>`).join("");
+  app.innerHTML=`${topbar("点検状況",null,"goHome")}
   <div class="screen">
+    <div class="month-picker compact">
+      <select class="month-select" onchange="onTeacherMonthChange(this.value)">${monthOpts}</select>
+    </div>
     <div class="statrow"><div class="stat bad"><div class="n">${badN}</div><div class="l">要修繕</div></div>
       <div class="stat"><div class="n" style="color:#b5790a">${warnN}</div><div class="l">要注意</div></div>
       <div class="stat ok"><div class="n">${doneFac}<span style="font-size:15px;color:#aeb6c0">/${totalFac}</span></div><div class="l">点検済み</div></div></div>
@@ -474,11 +657,71 @@ function renderTeacher(){
     </div>${body}
   </div>`;
 }
+async function onTeacherMonthChange(key){ setMonth(key); await loadAllRecords(); await loadRepairs(); render(); }
 function setTeacherTab(t){state.teacherTab=t;render();}
+
+/* ---- 対応記録モーダル ---- */
+let repairCtx=null;
+function openRepair(fid,idx,place,item){
+  repairCtx={fid,idx,place,item};
+  const rep=repairOf(fid,idx)||{};
+  const persons=activePersons();
+  const personOpts=`<option value="">選んでください</option>`+persons.map(p=>`<option value="${esc(p)}" ${rep.person===p?"selected":""}>${esc(p)}</option>`).join("");
+  const modal=document.createElement("div");
+  modal.className="modal-bg"; modal.id="repairModal";
+  modal.innerHTML=`<div class="modal">
+    <div class="modal-h">対応を記録</div>
+    <div class="modal-sub">${esc(place)}<br><span>${esc(item)}</span></div>
+    <label class="mlabel">対応した人</label>
+    <select class="month-select" id="rep-person">${personOpts}</select>
+    <label class="mlabel">対応の内容・メモ</label>
+    <textarea class="note-input" id="rep-note" placeholder="例：業者に連絡済み。○月○日に修理予定。">${esc(rep.note||"")}</textarea>
+    <label class="mcheck"><input type="checkbox" id="rep-done" ${rep.status==="done"?"checked":""}> 対応が完了した（対応済みにする）</label>
+    <div class="modal-btns">
+      ${rep.status?`<button class="mbtn mdel" onclick="deleteRepair()">記録を削除</button>`:""}
+      <button class="mbtn mcancel" onclick="closeRepair()">キャンセル</button>
+      <button class="mbtn msave" onclick="saveRepair()">保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function closeRepair(){const m=document.getElementById("repairModal");if(m)m.remove();repairCtx=null;}
+async function saveRepair(){
+  if(!repairCtx)return;
+  const person=document.getElementById("rep-person").value;
+  const note=document.getElementById("rep-note").value;
+  const done=document.getElementById("rep-done").checked;
+  if(!person){ toast("対応した人を選んでください"); return; }
+  const {fid,idx}=repairCtx;
+  const status=done?"done":"progress";
+  REPAIRS[`${fid}_${idx}`]={status,note,person,updated_at:new Date().toISOString()};
+  if(!sb){ toast("保存先が未設定のため端末内のみ反映"); closeRepair(); render(); return; }
+  try{
+    const row={facility_id:fid,item_index:idx,month:MONTH,status,note,person,updated_at:new Date().toISOString()};
+    const { error }=await sb.from("repairs").upsert(row,{onConflict:"facility_id,item_index,month"});
+    if(error) throw error;
+    toast("対応を記録しました"); closeRepair(); render();
+  }catch(e){ console.error(e); toast("保存に失敗しました。電波を確認してください"); }
+}
+async function deleteRepair(){
+  if(!repairCtx)return; const {fid,idx}=repairCtx;
+  if(!confirm("この対応記録を削除しますか？")) return;
+  delete REPAIRS[`${fid}_${idx}`];
+  if(!sb){ closeRepair(); render(); return; }
+  try{
+    const { error }=await sb.from("repairs").delete().eq("facility_id",fid).eq("item_index",idx).eq("month",MONTH);
+    if(error) throw error;
+    toast("削除しました"); closeRepair(); render();
+  }catch(e){ console.error(e); toast("削除に失敗しました"); }
+}
 
 function goHome(){state.screen="home";render();}
 function goFacilityList(){state.screen="facilityList";render();}
-function render(){window.scrollTo(0,0);switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();}}
+function render(){
+  // 点検入力中は全体再描画でのスクロールリセットをしない（部分更新で対応するため）
+  if(state.screen!=="inspect") window.scrollTo(0,0);
+  switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();}
+}
 (async()=>{await loadAssignments();render();})();
 
 </script>
