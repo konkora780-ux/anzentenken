@@ -658,7 +658,13 @@ function renderTeacher(){
   </div>`;
 }
 async function onTeacherMonthChange(key){ setMonth(key); await loadAllRecords(); await loadRepairs(); render(); }
-function setTeacherTab(t){state.teacherTab=t;render();}
+async function setTeacherTab(t){
+  state.teacherTab=t;
+  // タブを押すたびに最新データを読み直す
+  await loadAllRecords();
+  await loadRepairs();
+  render();
+}
 
 /* ---- 対応記録モーダル ---- */
 let repairCtx=null;
