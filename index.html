@@ -377,6 +377,43 @@ try {
 } catch (e) { console.warn("Supabase未接続", e); }
 
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
+
+/* ---- 古い記録の自動削除（2年度ぶんを残す） ----
+   日本の年度は4月始まり。1〜3月は前年を年度とする。
+   今年度と前年度は必ず残し、それより前の年度のデータ（点検・対応）を削除する。 */
+function fiscalYearOf(y,m){ return m>=4 ? y : y-1; } // 月(1-12)から年度を返す
+function currentFiscalYear(){ const d=new Date(); return fiscalYearOf(d.getFullYear(), d.getMonth()+1); }
+// 残す下限の年度（今年度と前年度を残す→ 前年度より前を削除）
+function keepFromFiscalYear(){ return currentFiscalYear()-1; }
+// monthキー("YYYY-MM")が削除対象か（残す下限の年度より前なら削除）
+function isOldMonth(monthKey){
+  const [y,m]=monthKey.split("-").map(Number);
+  return fiscalYearOf(y,m) < keepFromFiscalYear();
+}
+let purgeChecked=false;
+// 古い記録があれば管理者に確認して整理する（確認なしでは消さない）
+async function checkOldRecords(){
+  if(!sb||purgeChecked) return; purgeChecked=true;
+  try{
+    const { data, error }=await sb.from("inspections").select("month");
+    if(error||!data) return;
+    const months=[...new Set(data.map(r=>r.month))];
+    const oldMonths=months.filter(isOldMonth).sort();
+    if(!oldMonths.length) return;
+    const list=oldMonths.map(monthLabel).join("、");
+    const msg=`【古い記録の整理】\n\n2年より前（今年度・前年度より古い）の記録が ${oldMonths.length}か月分 あります。\n\n対象の月：${list}\n\nこれらを削除して整理しますか？\n（紙で保管している起案が正式な記録です。必要なものは先に報告書を印刷・保存してください）\n\n「OK」で削除します。`;
+    if(confirm(msg)){
+      // 念のためもう一度確認（取り返しがつかないため）
+      if(confirm(`本当に削除してよろしいですか？\n\n${oldMonths.length}か月分の点検記録と対応記録を削除します。\nこの操作は取り消せません。`)){
+        for(const mk of oldMonths){
+          await sb.from("inspections").delete().eq("month",mk);
+          await sb.from("repairs").delete().eq("month",mk);
+        }
+        toast(`${oldMonths.length}か月分の古い記録を整理しました`);
+      }
+    }
+  }catch(e){ console.warn("[古い記録の確認] スキップ:",e); }
+}
 function monthLabel(key){const [y,m]=key.split("-");return `${y}年${parseInt(m)}月`;}
 // 選択中の月（最初は今月）。点検も閲覧もこの月で動く
 let MONTH = currentMonthKey();
@@ -754,7 +791,7 @@ async function submitInspection(){
 
 /* ---- 教師ダッシュボード（対応記録・履歴対応） ---- */
 let REPAIRS={}; // key: `${facility_id}_${itemIndex}` -> {status, note, person, updated_at}
-async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!itemsLoaded)await loadItems();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();await loadRepairs();render();}
+async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!itemsLoaded)await loadItems();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();await loadRepairs();render();checkOldRecords();}
 async function loadAllRecords(){state.records=[];if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("month",MONTH);if(!error&&data)state.records=data.map(r=>({...r,answers:typeof r.answers==="string"?JSON.parse(r.answers):r.answers}));}catch(e){console.warn(e);}}
 async function loadRepairs(){
   REPAIRS={}; if(!sb) return;
