@@ -405,27 +405,27 @@ async function loadStaff(){
 
 /* ---- 割当管理 ---- */
 let ASSIGN={}; let assignLoaded=false;
-function buildInitialAssign(){const a={};FACILITIES_SEED.forEach(f=>{if(f.person)a[f.id]=f.person;});return a;}
+function buildInitialAssign(){const a={};FACILITIES_SEED.forEach(f=>{if(f.person)a[f.id]=[f.person];});return a;}
 async function loadAssignments(){
   ASSIGN=buildInitialAssign(); assignLoaded=true;
   if(!sb) return;
   try{
     const {data,error}=await sb.from("assignments").select("facility_id,person");
-    if(!error&&data&&data.length) data.forEach(r=>{ASSIGN[r.facility_id]=r.person||"";});
+    if(!error&&data&&data.length) data.forEach(r=>{ASSIGN[r.facility_id]= r.person ? String(r.person).split("・").filter(x=>x) : [];});
   }catch(e){console.warn("assignments読込",e);}
 }
-function personOf(fid){return ASSIGN[fid]||"";}
-function facilitiesOfPerson(person){return FACILITIES.filter(f=>personOf(f.id)===person);}
+function personsOf(fid){ const v=ASSIGN[fid]; if(!v) return []; return Array.isArray(v)?v.filter(x=>x):(v?[v]:[]); }
+function personOf(fid){ const a=personsOf(fid); return a.join("・"); } // 表示用（・区切り）
+function facilitiesOfPerson(person){return FACILITIES.filter(f=>personsOf(f.id).includes(person));}
 function activePersons(){
-  const set=new Set();Object.values(ASSIGN).forEach(p=>{if(p)set.add(p);});
+  const set=new Set();Object.values(ASSIGN).forEach(v=>{(Array.isArray(v)?v:[v]).forEach(p=>{if(p)set.add(p);});});
   const ordered=[];STAFF.forEach(p=>{if(set.has(p)){ordered.push(p);set.delete(p);}});
   [...set].forEach(p=>ordered.push(p));return ordered;
 }
 // 名簿全体（担当の有無に関わらず、登録された全先生）
 function allStaff(){
   const set=new Set(STAFF);
-  // 割当にいるが名簿にない人も拾う（取りこぼし防止）
-  Object.values(ASSIGN).forEach(p=>{if(p)set.add(p);});
+  Object.values(ASSIGN).forEach(v=>{(Array.isArray(v)?v:[v]).forEach(p=>{if(p)set.add(p);});});
   const ordered=[];STAFF.forEach(p=>{if(set.has(p)){ordered.push(p);set.delete(p);}});
   [...set].forEach(p=>ordered.push(p));return ordered;
 }
@@ -477,16 +477,16 @@ function renderRegister(){
   Object.keys(byBlock).forEach(block=>{
     html+=`<div class="block-label">${esc(block)}</div>`;
     byBlock[block].forEach(f=>{
-      const sel=state.regSel.has(f.id);const owner=personOf(f.id);const other=owner&&owner!==state.regPerson;
+      const sel=state.regSel.has(f.id);const others=personsOf(f.id).filter(p=>p!==state.regPerson);const otherText=others.join("・");
       html+=`<button class="pick reg-row ${sel?"reg-sel":""}" onclick="regToggle(${f.id})">
-        <span>${esc(f.place)}${other&&!sel?`<span class="owner-tag">今: ${esc(owner)}</span>`:""}</span>
+        <span>${esc(f.place)}${otherText?`<span class="owner-tag">他: ${esc(otherText)}</span>`:""}</span>
         <span class="check ${sel?"on":""}">${sel?"✓":""}</span></button>`;
     });
   });
   app.innerHTML=`
   ${topbar(esc(state.regPerson)+" さんの担当","担当する場所をタップで選ぶ","regBackToPersons")}
   <div class="screen" style="padding-bottom:8px">
-    <p class="lead">自分が点検する場所をすべて選んでください。ほかの先生が担当中の場所を選ぶと、担当が自分に変わります。</p>
+    <p class="lead">自分が点検する場所をすべて選んでください。同じ場所を複数の先生が担当してもかまいません（共同担当）。点検は、担当の誰か1人がやれば完了です。</p>
     ${html}
   </div>
   <div class="submitbar"><div class="submit-meta">${state.regSel.size} か所を選択中</div>
@@ -499,10 +499,18 @@ function regBackToPersons(){state.regPerson=null;state.regSel=new Set();render()
 function regToggle(fid){if(state.regSel.has(fid))state.regSel.delete(fid);else state.regSel.add(fid);render();}
 async function regSave(){
   const person=state.regPerson;
-  FACILITIES.forEach(f=>{const wasMine=personOf(f.id)===person;const nowMine=state.regSel.has(f.id);if(nowMine)ASSIGN[f.id]=person;else if(wasMine)ASSIGN[f.id]="";});
+  FACILITIES.forEach(f=>{
+    const cur=personsOf(f.id);              // 現在の担当者たち
+    const wasMine=cur.includes(person);
+    const nowMine=state.regSel.has(f.id);
+    let next=cur.slice();
+    if(nowMine && !wasMine) next.push(person);          // 自分を追加
+    else if(!nowMine && wasMine) next=next.filter(p=>p!==person); // 自分を外す（他の担当は残す）
+    ASSIGN[f.id]=next;
+  });
   if(!sb){toast("保存先が未設定のため、今は端末内のみ反映されます");state.screen="home";render();return;}
   try{
-    const rows=FACILITIES.map(f=>({facility_id:f.id,place:f.place,block:f.block,person:ASSIGN[f.id]||""}));
+    const rows=FACILITIES.map(f=>({facility_id:f.id,place:f.place,block:f.block,person:personsOf(f.id).join("・")}));
     const {error}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"});
     if(error)throw error;
     toast("担当を登録しました");state.screen="home";render();
@@ -790,15 +798,15 @@ async function printMonthReport(){
   <title>${MONTH_LABEL} 安全点検報告書</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
   <style>
-    @page{size:A4;margin:14mm;}
+    @page{size:A4;margin:35mm 14mm 14mm 14mm;}
     *{box-sizing:border-box;}
     body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;color:#1a2433;font-size:11px;line-height:1.5;margin:0;}
     h1{font-size:18px;text-align:center;margin:0 0 4px;}
-    .rep-header{position:relative;}
-    .qr-box{position:absolute;top:-4px;right:0;text-align:center;width:90px;}
-    .qr-box #qrcode{display:inline-block;}
-    .qr-box #qrcode img,.qr-box #qrcode canvas{width:72px!important;height:72px!important;}
-    .qr-label{font-size:8px;color:#666;margin-top:2px;line-height:1.3;}
+    .rep-header{position:relative;min-height:88px;}
+    .qr-box{position:absolute;top:0;right:0;text-align:center;width:96px;background:#fff;padding:6px;border:1px solid #eee;border-radius:4px;}
+    .qr-box #qrcode{display:inline-block;background:#fff;padding:4px;}
+    .qr-box #qrcode img,.qr-box #qrcode canvas{width:72px!important;height:72px!important;display:block;}
+    .qr-label{font-size:8px;color:#666;margin-top:3px;line-height:1.3;}
     .sub{text-align:center;color:#666;font-size:11px;margin-bottom:14px;}
     .stat-row{display:flex;gap:10px;margin-bottom:16px;justify-content:center;}
     .stat-box{border:1.5px solid #ccc;border-radius:6px;padding:8px 18px;text-align:center;}
@@ -835,7 +843,7 @@ async function printMonthReport(){
   </div>
   <div class="rep-header">
     <div class="qr-box"><div id="qrcode"></div><div class="qr-label">アプリで確認<br>（iPad等で読取）</div></div>
-    <h1>令和${MONTH.split("-")[0]-2018}年度　安全点検報告書</h1>
+    <h1 style="padding:0 100px;">令和${MONTH.split("-")[0]-2018}年度　安全点検報告書</h1>
     <div class="sub">対象月：${MONTH_LABEL}　／　作成日：${todayStr}</div>
   </div>
   <div class="stat-row">
@@ -1108,9 +1116,16 @@ function openPersonSwap(oldName){
 }
 function closePersonModal(){const m=document.getElementById("personModal");if(m)m.remove();personEditCtx=null;}
 async function applyPersonChange(oldName,newName){
-  // ASSIGNの該当者を全て付け替え
+  // ASSIGNの配列内の該当者を付け替え
   const changed=[];
-  Object.keys(ASSIGN).forEach(fid=>{ if(ASSIGN[fid]===oldName){ ASSIGN[fid]=newName; changed.push(parseInt(fid)); } });
+  Object.keys(ASSIGN).forEach(fid=>{
+    const arr=personsOf(fid);
+    if(arr.includes(oldName)){
+      // oldNameをnewNameに置換（重複は避ける）
+      const next=arr.map(p=>p===oldName?newName:p).filter((p,i,a)=>a.indexOf(p)===i);
+      ASSIGN[fid]=next; changed.push(parseInt(fid));
+    }
+  });
   // 名簿STAFFも更新（rename）または後任を追加（swap）
   const idx=STAFF.indexOf(oldName);
   if(personEditCtx && personEditCtx.mode==="rename"){
@@ -1120,7 +1135,7 @@ async function applyPersonChange(oldName,newName){
     if(!STAFF.includes(newName)) STAFF.push(newName);
   }
   if(sb){
-    const rows=changed.map(fid=>{const f=FACILITIES.find(x=>x.id===fid)||{};return {facility_id:fid,place:f.place||"",block:f.block||"",person:newName};});
+    const rows=changed.map(fid=>{const f=FACILITIES.find(x=>x.id===fid)||{};return {facility_id:fid,place:f.place||"",block:f.block||"",person:personsOf(fid).join("・")};});
     if(rows.length){ const {error}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"}); if(error)throw error; }
     // 名簿テーブルも更新
     try{
