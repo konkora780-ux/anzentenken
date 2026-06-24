@@ -280,6 +280,7 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 
 /* 編集中の注記 */
 .edit-note{font-size:12.5px; color:#b5790a; background:var(--warnbg); padding:8px 11px; border-radius:8px; margin-top:10px; font-weight:600;}
+.locked-note{font-size:12.5px; color:#56616f; background:#eef1f5; padding:10px 12px; border-radius:8px; margin-top:10px; font-weight:600; line-height:1.6; border:1px solid #d8dee6;}
 
 /* 対応記録ボックス */
 .repair-add{width:100%; margin-top:11px; padding:11px; border-radius:10px; border:1.5px dashed var(--accent); color:var(--accent); background:#f4f8fc; font-size:13.5px; font-weight:700;}
@@ -417,6 +418,8 @@ async function checkOldRecords(){
 function monthLabel(key){const [y,m]=key.split("-");return `${y}年${parseInt(m)}月`;}
 // 選択中の月（最初は今月）。点検も閲覧もこの月で動く
 let MONTH = currentMonthKey();
+// 点検そのものを編集できるのは「今月」だけ。過去の月は締め切り（対応記録は別途いつでも編集可）。
+function isInspectEditable(){ return MONTH === currentMonthKey(); }
 let MONTH_LABEL = monthLabel(MONTH);
 function setMonth(key){ MONTH=key; MONTH_LABEL=monthLabel(key); }
 // 月の選択肢: 今月から過去24か月＋翌月まで
@@ -620,6 +623,7 @@ function selectPerson(p){state.person=p;state.screen="facilityList";loadSubmitte
 async function loadSubmittedForPerson(person){state.submittedThisMonth=new Set();if(!sb)return;try{const ids=facilitiesOfPerson(person).map(f=>f.id);if(!ids.length)return;const{data,error}=await sb.from("inspections").select("facility_id").eq("month",MONTH).in("facility_id",ids);if(!error&&data)data.forEach(r=>state.submittedThisMonth.add(r.facility_id));}catch(e){console.warn(e);}}
 function renderFacilityList(){
   const list=facilitiesOfPerson(state.person);const byBlock={};list.forEach(f=>{(byBlock[f.block]=byBlock[f.block]||[]).push(f);});
+  const locked = !isInspectEditable(); // 過去月は締め切り
   let html="";Object.keys(byBlock).forEach(block=>{
     html+=`<div class="block-label">${esc(block)}</div>`;
     byBlock[block].forEach(f=>{
@@ -629,21 +633,22 @@ function renderFacilityList(){
           <button class="fac-main" onclick="startInspect(${f.id})">
             <span class="fp">${esc(f.place)}</span>
             <span class="badge done">提出済み</span></button>
-          <div class="fac-actions">
+          ${locked?"":`<div class="fac-actions">
             <button class="act edit" onclick="startInspect(${f.id})">修正する</button>
             <button class="act del" onclick="deleteInspection(${f.id},'${esc(f.place)}')">点検を取り消す</button>
-          </div></div>`;
+          </div>`}</div>`;
       } else {
-        html+=`<button class="pick" onclick="startInspect(${f.id})"><span>${esc(f.place)}</span><span class="badge todo">未点検</span></button>`;
+        html+=`<button class="pick" onclick="startInspect(${f.id})"><span>${esc(f.place)}</span><span class="badge todo">${locked?"未提出":"未点検"}</span></button>`;
       }
     });
   });
   const doneCount=list.filter(f=>state.submittedThisMonth.has(f.id)).length;
   app.innerHTML=`${topbar(esc(state.person)+" さん",`${MONTH_LABEL}　${doneCount}/${list.length} か所 提出済み`,"goPersonSelect")}
-  <div class="screen"><p class="lead">点検する場所を選んでください。提出済みは「修正」や「取り消し」ができます。</p>
+  <div class="screen"><p class="lead">${locked?`🔒 ${MONTH_LABEL}は締め切り済みです。内容の確認のみできます。`:"点検する場所を選んでください。提出済みは「修正」や「取り消し」ができます。"}</p>
     ${html||`<div class="empty">担当の場所がありません。「担当の登録・変更」で登録してください。</div>`}</div>`;
 }
 async function deleteInspection(fid,place){
+  if(!isInspectEditable()){ toast("過去の月は締め切り済みです。取り消しできません"); return; }
   if(!confirm(`「${place}」の${MONTH_LABEL}の点検を取り消します。よろしいですか？\n（記録が削除され、未点検に戻ります）`)) return;
   if(!sb){ state.submittedThisMonth.delete(fid); toast("取り消しました（保存先未設定）"); render(); return; }
   try{
@@ -696,10 +701,11 @@ function photoZoneHTML(i,ans){
 }
 function renderInspect(){
   const f=state.facility;
+  const locked = !isInspectEditable(); // 過去月は締め切り
   const cards=ITEMS.map((it,i)=>{
     const ans=state.answers[i]||{};const need=ans.mark==="bad"||ans.mark==="warn";
     const cardCls=ans.mark==="bad"?"answered-bad":ans.mark==="warn"?"answered-warn":"";
-    const choices=MARKS.map(m=>{const sel=ans.mark===m.key?m.cls:"";return `<button class="choice ${sel}" onclick="setMark(${i},'${m.key}')"><span class="sym">${m.sym}</span><span class="cap">${m.cap}</span></button>`;}).join("");
+    const choices=MARKS.map(m=>{const sel=ans.mark===m.key?m.cls:"";const onclick=locked?"":`onclick="setMark(${i},'${m.key}')"`;return `<button class="choice ${sel}" ${onclick} ${locked?"disabled":""}><span class="sym">${m.sym}</span><span class="cap">${m.cap}</span></button>`;}).join("");
     const pz= need ? photoZoneHTML(i,ans) : "";
     const carried = ans.carried && ans.mark==="na" ? `<span class="carried-tag">前月から引き継ぎ</span>` : "";
     return `<div class="qcard ${cardCls}" id="q${i}"><div class="qnum">No.${i+1}${carried}</div><div class="qtext">${esc(it)}</div><div class="choices">${choices}</div>${pz}</div>`;
@@ -709,19 +715,21 @@ function renderInspect(){
   app.innerHTML=`${topbar(esc(f.place),esc(f.block)+" ・ "+esc(state.person),"goFacilityList")}
   <div class="screen" style="padding-bottom:8px"><div class="facility-head"><div class="place">${esc(f.place)}</div>
     <div class="info">${esc(f.block)}　/　担当：${esc(state.person)}　/　${MONTH_LABEL}</div>
-    ${editing?`<div class="edit-note">提出済みの内容を修正できます。直したら、もう一度提出してください。</div>`:""}
+    ${locked?`<div class="locked-note">🔒 ${MONTH_LABEL}は締め切り済みです。点検内容は変更できません（確認のみ）。<br>修繕の対応記録は、管理画面からいつでも追加できます。</div>`:editing?`<div class="edit-note">提出済みの内容を修正できます。直したら、もう一度提出してください。</div>`:""}
     <div class="progress"><i id="pbar" style="width:${pct}%"></i></div></div>
-    <button class="bulk-ok" onclick="markAllOk()">✓ 残りをすべて「異常なし」にする</button>
+    ${locked?"":`<button class="bulk-ok" onclick="markAllOk()">✓ 残りをすべて「異常なし」にする</button>`}
     ${cards}</div>
-  <div class="submitbar"><div class="submit-meta">${answered}/${ITEMS.length} 項目を入力済み</div>
-    <button class="submit" id="sbtn" onclick="submitInspection()" ${answered<ITEMS.length?"disabled":""}>${editing?"✓ 修正した内容で出し直す":"✓ この場所の点検を提出する"}</button></div>`;
+  ${locked?"":`<div class="submitbar"><div class="submit-meta">${answered}/${ITEMS.length} 項目を入力済み</div>
+    <button class="submit" id="sbtn" onclick="submitInspection()" ${answered<ITEMS.length?"disabled":""}>${editing?"✓ 修正した内容で出し直す":"✓ この場所の点検を提出する"}</button></div>`}`;
 }
 // 未入力の項目をすべて「異常なし」にする（入力済みは変えない）
 function markAllOk(){
+  if(!isInspectEditable()){ toast("過去の月は締め切り済みです"); return; }
   ITEMS.forEach((it,i)=>{ if(!state.answers[i]||!state.answers[i].mark){ state.answers[i]={mark:"ok",note:"",photos:[]}; } });
   render();
 }
 function setMark(i,key){
+  if(!isInspectEditable()) return; // 過去月は変更不可
   const a=state.answers[i]||(state.answers[i]={photos:[],note:""});
   const prevNeed=(a.mark==="bad"||a.mark==="warn");
   a.mark=key;
@@ -773,6 +781,7 @@ function refreshThumbs(i){
 function compressImage(file,maxW,q){return new Promise(res=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{let{width,height}=img;if(width>maxW){height=Math.round(height*maxW/width);width=maxW;}const c=document.createElement("canvas");c.width=width;c.height=height;c.getContext("2d").drawImage(img,0,0,width,height);URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",q));};img.onerror=()=>{URL.revokeObjectURL(url);res(null);};img.src=url;});}
 function dataUrlToBlob(d){const[h,b]=d.split(",");const m=h.match(/:(.*?);/)[1];const bin=atob(b);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:m});}
 async function submitInspection(){
+  if(!isInspectEditable()){ toast("過去の月は締め切り済みです。点検内容は変更できません"); return; }
   const f=state.facility;const btn=document.getElementById("sbtn");
   if(!sb){toast("保存先が未設定のため保存されません");state.submittedThisMonth.add(f.id);state.screen="facilityList";render();return;}
   btn.disabled=true;btn.textContent="送信中…";
