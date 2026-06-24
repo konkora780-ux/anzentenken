@@ -299,6 +299,19 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .manage-fac-btn.add{background:#eef7f1; color:var(--ok); border-color:#b8ddc5; margin-bottom:14px;}
 .manage-fac-btn.person{background:#f3eefb; color:#6b4b9e; border-color:#dcd0ee;}
 .manage-fac-btn.person:active{background:#ebe2f7;}
+.manage-fac-btn.item{background:#fef6e8; color:#9a6a12; border-color:#f0dca8;}
+.manage-fac-btn.item:active{background:#fbeed4;}
+
+/* 一括「異常なし」ボタン */
+.bulk-ok{width:100%; padding:12px; border-radius:11px; background:#e6f4ec; color:#2e7d4f; font-size:14px; font-weight:700; border:1.5px solid #b8ddc5; margin-bottom:12px;}
+.bulk-ok:active{background:#d6ecdf;}
+
+/* 前月引き継ぎタグ */
+.carried-tag{display:inline-block; font-size:10px; font-weight:700; color:#6b7480; background:#eef1f5; padding:2px 7px; border-radius:99px; margin-left:7px; vertical-align:middle;}
+
+/* 点検項目番号 */
+.item-no{display:inline-block; min-width:22px; height:22px; line-height:22px; text-align:center; background:#2e5d8f; color:#fff; border-radius:6px; font-size:11px; font-weight:700; margin-right:8px;}
+.fac-manage-row .act[disabled]{opacity:.3;}
 .fac-manage-row{background:#fff; border-radius:12px; padding:13px 15px; margin-bottom:9px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; gap:10px;}
 .fac-manage-row .fmr-main{flex:1; min-width:0;}
 .fac-manage-row .fp{font-size:15px; font-weight:700;}
@@ -318,7 +331,7 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 <script>
 const FACILITIES_SEED = [{"id": 0, "person": "高橋 晃", "block": "南校舎棟１F", "place": "校長室"}, {"id": 1, "person": "高橋 晃", "block": "南校舎棟１F", "place": "事務室"}, {"id": 2, "person": "鈴木 野乃香", "block": "南校舎棟１F", "place": "職員・来客玄関ポーチ"}, {"id": 3, "person": "鈴木 野乃香", "block": "北校舎棟１F", "place": "消火栓ポンプ室"}, {"id": 4, "person": "細川 功", "block": "南校舎棟１F", "place": "技能職員室"}, {"id": 5, "person": "細川 功", "block": "南校舎棟１F", "place": "職員トイレ(男)"}, {"id": 6, "person": "細川 功", "block": "北校舎棟１F", "place": "LPGボンベ庫・ゴミ置き場"}, {"id": 7, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "放送室"}, {"id": 8, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "視聴覚室"}, {"id": 9, "person": "玉山 幸平", "block": "南校舎棟２F", "place": "パソコン室"}, {"id": 10, "person": "村上 みさと", "block": "南校舎棟１F", "place": "職員室(小中分)"}, {"id": 11, "person": "村上 みさと", "block": "南校舎棟１F", "place": "湯沸室"}, {"id": 12, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "倉庫(職員室前)"}, {"id": 13, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "階段(職員室前)"}, {"id": 14, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "会議室"}, {"id": 15, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "教育相談室"}, {"id": 16, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "書庫"}, {"id": 17, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "エレベーター"}, {"id": 18, "person": "伊藤 弘美", "block": "南校舎棟２F", "place": "教材室（印刷室関係）"}, {"id": 19, "person": "星野 美和子", "block": "南校舎棟１F", "place": "支援室"}, {"id": 20, "person": "星野 美和子", "block": "南校舎棟１F", "place": "廊下(放送室前～EVホール～教材室)"}, {"id": 21, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "保健室"}, {"id": 22, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "倉庫(理科室隣)"}, {"id": 23, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "医療的ケア室"}, {"id": 24, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "小学部5年２組・6年2組"}, {"id": 25, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "児童生徒トイレ(男子)"}, {"id": 26, "person": "湊 敬子", "block": "南校舎棟１F", "place": "小学部１年１組"}, {"id": 27, "person": "湊 敬子", "block": "南校舎棟１F", "place": "職員更衣室(女)"}, {"id": 28, "person": "細越 捺美", "block": "南校舎棟１F", "place": "小学部1年2組・2年2組・4年3組"}, {"id": 29, "person": "細越 捺美", "block": "南校舎棟１F", "place": "多目的トイレ"}, {"id": 30, "person": "細越 捺美", "block": "南校舎棟１F", "place": "シャワー室"}, {"id": 31, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "小学部2年1組"}, {"id": 32, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "階段(理科室隣)"}, {"id": 33, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "個別学習室１（小学部）"}, {"id": 34, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "教材室１"}, {"id": 35, "person": "近藤 史隆", "block": "南校舎棟１F", "place": "体育館渡り廊下・ホール・トイレ"}, {"id": 36, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "生徒トイレ(男子)"}, {"id": 37, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "個別学習室２（高等部）"}, {"id": 38, "person": "菊池 健斗", "block": "南校舎棟１F", "place": "体育館"}, {"id": 39, "person": "菊池 健斗", "block": "屋外", "place": "グラウンド（遊具等）"}, {"id": 40, "person": "荒木 沙也香", "block": "南校舎棟１F", "place": "図工室（準備室）"}, {"id": 41, "person": "荒木 沙也香", "block": "南校舎棟２F", "place": "中学部３年１組"}, {"id": 42, "person": "竹澤 里栄", "block": "南校舎棟１F", "place": "理科室（準備室）"}, {"id": 43, "person": "竹澤 里栄", "block": "南校舎棟２F", "place": "図書室"}, {"id": 44, "person": "吉田 好子", "block": "南校舎棟１F", "place": "児童生徒トイレ(女子)"}, {"id": 45, "person": "吉田 好子", "block": "南校舎棟１F", "place": "プレイルーム・ホール・渡り廊下"}, {"id": 46, "person": "高橋 天地", "block": "南校舎棟１F", "place": "職員更衣室(男)"}, {"id": 47, "person": "高橋 天地", "block": "南校舎棟２F", "place": "中学部１年１組"}, {"id": 48, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "職員トイレ(女)"}, {"id": 49, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "テラス"}, {"id": 50, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "児童生徒昇降口・ポーチ"}, {"id": 51, "person": "臼澤 育子", "block": "南校舎棟１F", "place": "給食配膳室"}, {"id": 52, "person": "千田 一輝", "block": "北校舎棟１F", "place": "高等部工芸室"}, {"id": 53, "person": "千田 一輝", "block": "北校舎棟２F", "place": "高等部３年１組"}, {"id": 54, "person": "千葉 登志美", "block": "北校舎棟１F", "place": "高等部紙工室"}, {"id": 55, "person": "千葉 登志美", "block": "北校舎棟２F", "place": "生徒更衣室(女)"}, {"id": 56, "person": "阿部 良利", "block": "北校舎棟１F", "place": "高等部作業室"}, {"id": 57, "person": "阿部 良利", "block": "北校舎棟２F", "place": "生徒トイレ(男子)"}, {"id": 58, "person": "城内 美沙", "block": "北校舎棟１F", "place": "家庭科室（準備室・作法室）"}, {"id": 59, "person": "城内 美沙", "block": "南校舎棟２F", "place": "中学部調理室（準備室）"}, {"id": 60, "person": "古戸 優望", "block": "北校舎棟１F", "place": "階段(トイレ前)"}, {"id": 61, "person": "古戸 優望", "block": "北校舎棟２F", "place": "高等部２年２組"}, {"id": 62, "person": "福士 優", "block": "北校舎棟１F", "place": "生徒トイレ(女子)"}, {"id": 63, "person": "福士 優", "block": "北校舎棟２F", "place": "職員トイレ(女)"}, {"id": 64, "person": "高橋 珠", "block": "北校舎棟１F", "place": "多目的トイレ"}, {"id": 65, "person": "高橋 珠", "block": "北校舎棟１F", "place": "シャワー室"}, {"id": 66, "person": "畠山 麻優香", "block": "北校舎棟１F", "place": "廊下・プール渡り廊下"}, {"id": 67, "person": "畠山 麻優香", "block": "北校舎棟２F", "place": "高等部1年1組"}, {"id": 68, "person": "工藤 柊", "block": "北校舎棟１F", "place": "プール"}, {"id": 69, "person": "工藤 柊", "block": "南校舎棟２F", "place": "中学部２年１組"}, {"id": 70, "person": "阿部 藍", "block": "北校舎棟１F", "place": "高等部２年３組"}, {"id": 71, "person": "阿部 藍", "block": "北校舎棟１F", "place": "個別学習室１（高等部）"}, {"id": 72, "person": "那須 星香", "block": "南校舎棟２F", "place": "中学部２年２組"}, {"id": 73, "person": "那須 星香", "block": "南校舎棟２F", "place": "多目的トイレ"}, {"id": 74, "person": "那須 星香", "block": "南校舎棟２F", "place": "シャワー室"}, {"id": 75, "person": "志田 望", "block": "南校舎棟２F", "place": "中学部紙工室（準備室）"}, {"id": 76, "person": "志田 望", "block": "南校舎棟２F", "place": "児童生徒トイレ(男子)"}, {"id": 77, "person": "志田 望", "block": "南校舎棟２F", "place": "生徒更衣室(男子)"}, {"id": 78, "person": "村上 綾", "block": "南校舎棟２F", "place": "教材室２"}, {"id": 79, "person": "村上 綾", "block": "南校舎棟２F", "place": "個別学習室１(中学部)"}, {"id": 80, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "個別学習室２(中学部)"}, {"id": 81, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "廊下(教材室～音楽室)"}, {"id": 82, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "個別学習室２（小学部）"}, {"id": 83, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "屋外階段１・避難滑り台"}, {"id": 84, "person": "中家 夏海", "block": "南校舎棟２F", "place": "小学部4年1組"}, {"id": 85, "person": "中家 夏海", "block": "南校舎棟２F", "place": "音楽室（準備室）"}, {"id": 86, "person": "久保 美紀", "block": "南校舎棟２F", "place": "小学部３年１組"}, {"id": 87, "person": "久保 美紀", "block": "南校舎棟２F", "place": "廊下(渡り廊下～北校舎階段横廊下)"}, {"id": 88, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "小学部4年2組・5年1組・6年1組"}, {"id": 89, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "バルコニー"}, {"id": 90, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "児童生徒トイレ(女子)"}, {"id": 91, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "生徒更衣室(女子)"}, {"id": 92, "person": "柏山 典子", "block": "北校舎棟２F", "place": "高等部２年1組"}, {"id": 93, "person": "柏山 典子", "block": "北校舎棟２F", "place": "教材室４"}, {"id": 94, "person": "千葉 智子", "block": "北校舎棟２F", "place": "職員室(高)"}, {"id": 95, "person": "千葉 智子", "block": "北校舎棟２F", "place": "湯沸室"}, {"id": 96, "person": "中條 広一", "block": "北校舎棟２F", "place": "屋外階段２"}, {"id": 97, "person": "中條 広一", "block": "北校舎棟２F", "place": "廊下(職員室前～生徒用トイレ前)"}, {"id": 98, "person": "新沼 千明", "block": "北校舎棟２F", "place": "生徒トイレ(女子)"}, {"id": 99, "person": "新沼 千明", "block": "北校舎棟２F", "place": "多目的トイレ"}, {"id": 100, "person": "新沼 千明", "block": "北校舎棟２F", "place": "シャワー室"}, {"id": 101, "person": "新沼 千明", "block": "屋外", "place": "部室棟"}, {"id": 102, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "職員トイレ(男)"}, {"id": 103, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "生徒更衣室(男)"}, {"id": 104, "person": "太田 綾", "block": "釜石病院校舎", "place": "学習室１"}, {"id": 105, "person": "太田 綾", "block": "釜石病院校舎", "place": "洗面室"}, {"id": 106, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "学習室２"}, {"id": 107, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "男子トイレ・シャワー室"}, {"id": 108, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "階段"}, {"id": 109, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "学習室３"}, {"id": 110, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "教材室"}, {"id": 111, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "女子トイレ"}];
 const PERSONS_SEED = ["高橋 晃", "鈴木 野乃香", "細川 功", "玉山 幸平", "村上 みさと", "熊谷 美早紀", "菊池 いずみ", "伊藤 弘美", "星野 美和子", "村木 ゆき", "浅沼 樹", "湊 敬子", "細越 捺美", "大澤 美咲", "佐々木 尚子", "近藤 史隆", "菊池 健斗", "荒木 沙也香", "竹澤 里栄", "吉田 好子", "高橋 天地", "佐藤 暢子", "臼澤 育子", "千田 一輝", "千葉 登志美", "阿部 良利", "城内 美沙", "古戸 優望", "福士 優", "高橋 珠", "畠山 麻優香", "工藤 柊", "阿部 藍", "那須 星香", "志田 望", "村上 綾", "長野 和歌子", "岩渕 正子", "中家 夏海", "久保 美紀", "袴田 まどか", "千崎 友里子", "柏山 典子", "千葉 智子", "中條 広一", "新沼 千明", "斎藤 道幸", "太田 綾", "小水内 光浩", "小笠原 早苗"];
-const ITEMS = ["床の浮きや破損はないか", "床が滑りやすく、転倒の危険はないか", "棚の上から落ちそうな危険な物はないか／棚はきちんと固定されているか", "黒板・掲示物の取り付けは安全か", "天井・壁に破損はないか", "TV・教具等の備品設置場所は適切か", "窓やガラスがはずれやすくなっている箇所や破損はないか", "机・椅子・棚類の破損はないか", "敷居のレール及び戸や鍵は安全か", "通路や出入り口付近は歩きやすく安全か", "ベランダの破損や異状はないか", "非常時の退避口の状況はよいか", "手洗い場付近は清潔で安全か", "階段の手すりに異状はないか", "スイッチ・コンセント等に異状はないか", "照明及び電気器具に異状はないか", "暖房器具の破損、異状はないか", "ガスコンロ、湯沸かし器の異状、管の傷みはないか", "消火器の周りにじゃまなものはないか", "清掃用具置き場は整理され、衛生的か"];
+const ITEMS_SEED = ["床の浮きや破損はないか", "床が滑りやすく、転倒の危険はないか", "棚の上から落ちそうな危険な物はないか／棚はきちんと固定されているか", "黒板・掲示物の取り付けは安全か", "天井・壁に破損はないか", "TV・教具等の備品設置場所は適切か", "窓やガラスがはずれやすくなっている箇所や破損はないか", "机・椅子・棚類の破損はないか", "敷居のレール及び戸や鍵は安全か", "通路や出入り口付近は歩きやすく安全か", "ベランダの破損や異状はないか", "非常時の退避口の状況はよいか", "手洗い場付近は清潔で安全か", "階段の手すりに異状はないか", "スイッチ・コンセント等に異状はないか", "照明及び電気器具に異状はないか", "暖房器具の破損、異状はないか", "ガスコンロ、湯沸かし器の異状、管の傷みはないか", "消火器の周りにじゃまなものはないか", "清掃用具置き場は整理され、衛生的か"];
 
 </script>
 <script>
@@ -401,6 +414,20 @@ async function loadStaff(){
     const { data, error }=await sb.from("staff").select("name, sort_order").order("sort_order",{ascending:true});
     if(!error && data && data.length){ STAFF = data.map(s=>s.name); }
   }catch(e){ console.warn("staff読込",e); }
+}
+
+/* ---- 点検項目の管理 ----
+   ITEMS_SEED（HTML埋め込み）を初期値に、items テーブルがあればそれを使う。
+   各校で項目を追加・編集・削除できる。過去記録は記録時の項目名を保存して守る。 */
+let ITEMS = [...ITEMS_SEED];
+let itemsLoaded=false;
+async function loadItems(){
+  itemsLoaded=true;
+  if(!sb) return;
+  try{
+    const { data, error }=await sb.from("items").select("text, sort_order").order("sort_order",{ascending:true});
+    if(!error && data && data.length){ ITEMS = data.map(r=>r.text); }
+  }catch(e){ console.warn("items読込",e); }
 }
 
 /* ---- 割当管理 ---- */
@@ -566,7 +593,36 @@ async function deleteInspection(fid,place){
   }catch(e){ console.error(e); toast("取り消しに失敗しました。電波を確認してください"); }
 }
 function startInspect(fid){state.facility=FACILITIES.find(f=>f.id===fid);state.answers={};state.screen="inspect";loadExisting(fid).then(render);}
-async function loadExisting(fid){if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("facility_id",fid).eq("month",MONTH).maybeSingle();if(!error&&data&&data.answers){const a=typeof data.answers==="string"?JSON.parse(data.answers):data.answers;Object.keys(a).forEach(k=>{state.answers[k]={mark:a[k].mark,note:a[k].note||"",photos:(a[k].photos||[]).map(u=>({url:u,uploaded:true}))};});}}catch(e){console.warn(e);}}
+// 前月のキー（YYYY-MM）を返す
+function prevMonthKey(){const [y,m]=MONTH.split("-").map(Number);const d=new Date(y,m-2,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
+async function loadExisting(fid){
+  if(!sb)return;
+  try{
+    const{data,error}=await sb.from("inspections").select("*").eq("facility_id",fid).eq("month",MONTH).maybeSingle();
+    if(!error&&data&&data.answers){
+      // 今月の既存データがある → それを読み込む
+      const a=typeof data.answers==="string"?JSON.parse(data.answers):data.answers;
+      Object.keys(a).forEach(k=>{state.answers[k]={mark:a[k].mark,note:a[k].note||"",photos:(a[k].photos||[]).map(u=>({url:u,uploaded:true}))};});
+      return;
+    }
+    // 今月がまだ → 前月の「設備なし(／)」だけ引き継いで初期表示
+    const pm=prevMonthKey();
+    const{data:prev}=await sb.from("inspections").select("answers").eq("facility_id",fid).eq("month",pm).maybeSingle();
+    if(prev&&prev.answers){
+      const pa=typeof prev.answers==="string"?JSON.parse(prev.answers):prev.answers;
+      // 前月の項目名と現在のITEMSを突き合わせ、「設備なし」を同じ項目に引き継ぐ
+      Object.keys(pa).forEach(k=>{
+        if(pa[k].mark==="na"){
+          const prevItemName=pa[k].item;
+          // 項目名が一致するなら、現在の同じ番号に引き継ぐ（項目編集に強い）
+          let idx=k;
+          if(prevItemName){ const found=ITEMS.indexOf(prevItemName); if(found>=0) idx=String(found); }
+          state.answers[idx]={mark:"na",note:"",photos:[],carried:true};
+        }
+      });
+    }
+  }catch(e){console.warn(e);}
+}
 const MARKS=[{key:"ok",sym:"〇",cap:"異常なし",cls:"sel-ok"},{key:"na",sym:"／",cap:"設備なし",cls:"sel-na"},{key:"warn",sym:"△",cap:"要注意",cls:"sel-warn"},{key:"bad",sym:"×",cap:"要修繕",cls:"sel-bad"}];
 function photoZoneHTML(i,ans){
   const thumbs=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}"><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
@@ -583,7 +639,8 @@ function renderInspect(){
     const cardCls=ans.mark==="bad"?"answered-bad":ans.mark==="warn"?"answered-warn":"";
     const choices=MARKS.map(m=>{const sel=ans.mark===m.key?m.cls:"";return `<button class="choice ${sel}" onclick="setMark(${i},'${m.key}')"><span class="sym">${m.sym}</span><span class="cap">${m.cap}</span></button>`;}).join("");
     const pz= need ? photoZoneHTML(i,ans) : "";
-    return `<div class="qcard ${cardCls}" id="q${i}"><div class="qnum">No.${i+1}</div><div class="qtext">${esc(it)}</div><div class="choices">${choices}</div>${pz}</div>`;
+    const carried = ans.carried && ans.mark==="na" ? `<span class="carried-tag">前月から引き継ぎ</span>` : "";
+    return `<div class="qcard ${cardCls}" id="q${i}"><div class="qnum">No.${i+1}${carried}</div><div class="qtext">${esc(it)}</div><div class="choices">${choices}</div>${pz}</div>`;
   }).join("");
   const answered=Object.keys(state.answers).filter(k=>state.answers[k].mark).length;const pct=Math.round(answered/ITEMS.length*100);
   const editing = state.submittedThisMonth.has(f.id);
@@ -591,9 +648,16 @@ function renderInspect(){
   <div class="screen" style="padding-bottom:8px"><div class="facility-head"><div class="place">${esc(f.place)}</div>
     <div class="info">${esc(f.block)}　/　担当：${esc(state.person)}　/　${MONTH_LABEL}</div>
     ${editing?`<div class="edit-note">提出済みの内容を修正できます。直したら、もう一度提出してください。</div>`:""}
-    <div class="progress"><i id="pbar" style="width:${pct}%"></i></div></div>${cards}</div>
+    <div class="progress"><i id="pbar" style="width:${pct}%"></i></div></div>
+    <button class="bulk-ok" onclick="markAllOk()">✓ 残りをすべて「異常なし」にする</button>
+    ${cards}</div>
   <div class="submitbar"><div class="submit-meta">${answered}/${ITEMS.length} 項目を入力済み</div>
     <button class="submit" id="sbtn" onclick="submitInspection()" ${answered<ITEMS.length?"disabled":""}>${editing?"✓ 修正した内容で出し直す":"✓ この場所の点検を提出する"}</button></div>`;
+}
+// 未入力の項目をすべて「異常なし」にする（入力済みは変えない）
+function markAllOk(){
+  ITEMS.forEach((it,i)=>{ if(!state.answers[i]||!state.answers[i].mark){ state.answers[i]={mark:"ok",note:"",photos:[]}; } });
+  render();
 }
 function setMark(i,key){
   const a=state.answers[i]||(state.answers[i]={photos:[],note:""});
@@ -654,7 +718,7 @@ async function submitInspection(){
     const out={};
     for(const k of Object.keys(state.answers)){const a=state.answers[k];const photoUrls=[];
       for(const p of (a.photos||[])){if(p.uploaded&&p.url){photoUrls.push(p.url);continue;}if(p.dataUrl){const blob=dataUrlToBlob(p.dataUrl);const path=`${MONTH}/${f.id}/${k}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;const{error:upErr}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:"image/jpeg",upsert:false});if(upErr){console.warn(upErr);continue;}const{data:pub}=sb.storage.from(BUCKET).getPublicUrl(path);photoUrls.push(pub.publicUrl);}}
-      out[k]={mark:a.mark,note:a.note||"",photos:photoUrls};}
+      out[k]={mark:a.mark,note:a.note||"",photos:photoUrls,item:ITEMS[k]||""};}
     const hasIssue=Object.values(out).some(o=>o.mark==="bad"||o.mark==="warn");
     const row={facility_id:f.id,place:f.place,block:f.block,person:state.person,month:MONTH,answers:out,has_issue:hasIssue,submitted_at:new Date().toISOString()};
     const{error}=await sb.from("inspections").upsert(row,{onConflict:"facility_id,month"});
@@ -665,7 +729,7 @@ async function submitInspection(){
 
 /* ---- 教師ダッシュボード（対応記録・履歴対応） ---- */
 let REPAIRS={}; // key: `${facility_id}_${itemIndex}` -> {status, note, person, updated_at}
-async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();await loadRepairs();render();}
+async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!itemsLoaded)await loadItems();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();await loadRepairs();render();}
 async function loadAllRecords(){state.records=[];if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("month",MONTH);if(!error&&data)state.records=data.map(r=>({...r,answers:typeof r.answers==="string"?JSON.parse(r.answers):r.answers}));}catch(e){console.warn(e);}}
 async function loadRepairs(){
   REPAIRS={}; if(!sb) return;
@@ -679,7 +743,7 @@ function renderTeacher(){
   const recs=state.records;const submittedIds=new Set(recs.map(r=>r.facility_id));
   const totalFac=FACILITIES.length,doneFac=submittedIds.size;
   const unassigned=FACILITIES.filter(f=>!personOf(f.id));
-  const issues=[];recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{if(a[k].mark==="bad"||a[k].mark==="warn")issues.push({fid:r.facility_id,idx:parseInt(k),place:r.place,block:r.block,person:r.person,item:ITEMS[k],mark:a[k].mark,note:a[k].note,photos:a[k].photos||[]});});});
+  const issues=[];recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{if(a[k].mark==="bad"||a[k].mark==="warn")issues.push({fid:r.facility_id,idx:parseInt(k),place:r.place,block:r.block,person:r.person,item:a[k].item||ITEMS[k]||"",mark:a[k].mark,note:a[k].note,photos:a[k].photos||[]});});});
   const badN=issues.filter(i=>i.mark==="bad").length,warnN=issues.filter(i=>i.mark==="warn").length;
   let body="";
   if(state.teacherTab==="issues"){
@@ -722,6 +786,7 @@ function renderTeacher(){
     </div>
     <button class="manage-fac-btn" onclick="goFacilityManage()">🏫 施設の管理（名前変更・追加・削除）</button>
     <button class="manage-fac-btn person" onclick="goPersonManage()">🧑‍🏫 担当の先生の管理（転勤・名前変更）</button>
+    <button class="manage-fac-btn item" onclick="goItemManage()">📋 点検項目の管理（追加・編集・削除）</button>
     <div class="statrow"><div class="stat bad"><div class="n">${badN}</div><div class="l">要修繕</div></div>
       <div class="stat"><div class="n" style="color:#b5790a">${warnN}</div><div class="l">要注意</div></div>
       <div class="stat ok"><div class="n">${doneFac}<span style="font-size:15px;color:#aeb6c0">/${totalFac}</span></div><div class="l">点検済み</div></div></div>
@@ -747,7 +812,7 @@ async function printMonthReport(){
   recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{
     if(a[k].mark==="bad"||a[k].mark==="warn"){
       const rep=repairOf(r.facility_id,parseInt(k));
-      issues.push({place:r.place,block:r.block,person:r.person,item:ITEMS[k],mark:a[k].mark,note:a[k].note,photos:a[k].photos||[],rep});
+      issues.push({place:r.place,block:r.block,person:r.person,item:a[k].item||ITEMS[k]||"",mark:a[k].mark,note:a[k].note,photos:a[k].photos||[],rep});
     }
   });});
   issues.sort((a,b)=>(a.mark==="bad"?0:1)-(b.mark==="bad"?0:1));
@@ -1080,6 +1145,83 @@ async function deletePerson(name){
   toast("先生を削除しました");
   render();
 }
+
+/* ---- 点検項目の管理 ---- */
+async function goItemManage(){
+  if(!itemsLoaded) await loadItems();
+  state.screen="itemManage"; render();
+}
+function renderItemManage(){
+  const rows=ITEMS.map((it,i)=>`<div class="fac-manage-row">
+    <div class="fmr-main"><div class="fp"><span class="item-no">${i+1}</span>${esc(it)}</div></div>
+    <div class="fmr-acts">
+      <button class="act" onclick="moveItem(${i},-1)" ${i===0?"disabled":""}>↑</button>
+      <button class="act" onclick="moveItem(${i},1)" ${i===ITEMS.length-1?"disabled":""}>↓</button>
+      <button class="act edit" onclick="openItemEdit(${i})">変更</button>
+      <button class="act del" onclick="deleteItem(${i})">削除</button>
+    </div></div>`).join("");
+  app.innerHTML=`${topbar("点検項目の管理",`全${ITEMS.length}項目`,"goTeacher")}
+  <div class="screen">
+    <div class="setup-warn" style="background:#eef3f9;border-color:#cdddf0;color:#2b4a6b">
+      点検する項目を追加・変更・削除できます。並び順は↑↓で変えられます。<b>過去の点検記録は、当時の項目のまま残ります</b>ので安心して変更できます。
+    </div>
+    <button class="manage-fac-btn add" onclick="openItemAdd()">＋ 新しい点検項目を追加する</button>
+    ${rows}
+  </div>`;
+}
+let itemEditCtx=null;
+function openItemEdit(idx){
+  itemEditCtx={mode:"edit",idx};
+  showItemModal("点検項目を変更", ITEMS[idx]);
+}
+function openItemAdd(){
+  itemEditCtx={mode:"add"};
+  showItemModal("新しい点検項目を追加", "");
+}
+function showItemModal(title, text){
+  const modal=document.createElement("div");
+  modal.className="modal-bg"; modal.id="itemModal";
+  modal.innerHTML=`<div class="modal">
+    <div class="modal-h">${title}</div>
+    <label class="mlabel">点検項目の文章</label>
+    <textarea class="note-input" id="item-text" placeholder="例：消火器の周りにじゃまなものはないか" style="min-height:64px">${esc(text)}</textarea>
+    <div class="modal-btns">
+      <button class="mbtn mcancel" onclick="closeItemModal()">キャンセル</button>
+      <button class="mbtn msave" onclick="saveItemModal()">保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function closeItemModal(){const m=document.getElementById("itemModal");if(m)m.remove();itemEditCtx=null;}
+async function persistItems(){
+  if(!sb) return true;
+  try{
+    // 全削除して入れ直す（順番込みで確実に反映）
+    await sb.from("items").delete().neq("text","___none___");
+    const rows=ITEMS.map((t,i)=>({text:t,sort_order:i}));
+    if(rows.length){ const {error}=await sb.from("items").insert(rows); if(error)throw error; }
+    return true;
+  }catch(e){ console.error(e); toast("項目の保存に失敗しました"); return false; }
+}
+async function saveItemModal(){
+  const text=document.getElementById("item-text").value.trim();
+  if(!text){ toast("項目の文章を入れてください"); return; }
+  if(itemEditCtx.mode==="edit"){ ITEMS[itemEditCtx.idx]=text; }
+  else { ITEMS.push(text); }
+  if(await persistItems()){ toast(itemEditCtx.mode==="edit"?"項目を変更しました":"項目を追加しました"); closeItemModal(); render(); }
+}
+async function deleteItem(idx){
+  if(ITEMS.length<=1){ toast("項目は1つ以上必要です"); return; }
+  if(!confirm(`「${ITEMS[idx]}」を点検項目から削除します。よろしいですか？\n（過去の点検記録は当時のまま残ります）`)) return;
+  ITEMS.splice(idx,1);
+  if(await persistItems()){ toast("項目を削除しました"); render(); }
+}
+async function moveItem(idx,dir){
+  const ni=idx+dir; if(ni<0||ni>=ITEMS.length) return;
+  const tmp=ITEMS[idx]; ITEMS[idx]=ITEMS[ni]; ITEMS[ni]=tmp;
+  render();
+  await persistItems();
+}
 // 名前の個別修正
 let personEditCtx=null;
 function openPersonRename(oldName){
@@ -1236,9 +1378,9 @@ function goFacilityList(){state.screen="facilityList";render();}
 function render(){
   // 点検入力中は全体再描画でのスクロールリセットをしない（部分更新で対応するため）
   if(state.screen!=="inspect") window.scrollTo(0,0);
-  switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();case "facManage":return renderFacManage();case "personManage":return renderPersonManage();}
+  switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();case "facManage":return renderFacManage();case "personManage":return renderPersonManage();case "itemManage":return renderItemManage();}
 }
-(async()=>{await loadFacilities();await loadStaff();await loadAssignments();render();})();
+(async()=>{await loadFacilities();await loadStaff();await loadItems();await loadAssignments();render();})();
 
 </script>
 </body>
