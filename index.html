@@ -798,7 +798,9 @@ async function printMonthReport(){
   <title>${MONTH_LABEL} 安全点検報告書</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
   <style>
-    @page{size:A4;margin:35mm 14mm 14mm 14mm;}
+    @page{size:A4;margin:14mm;}
+    .print-toparea{height:21mm;}
+    @media screen{.print-toparea{height:0;}}
     *{box-sizing:border-box;}
     body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;color:#1a2433;font-size:11px;line-height:1.5;margin:0;}
     h1{font-size:18px;text-align:center;margin:0 0 4px;}
@@ -841,6 +843,7 @@ async function printMonthReport(){
     <button onclick="window.print()">🖨️ 印刷する</button>
     <button onclick="window.close()" style="background:#888">閉じる</button>
   </div>
+  <div class="print-toparea"></div>
   <div class="rep-header">
     <div class="qr-box"><div id="qrcode"></div><div class="qr-label">アプリで確認<br>（iPad等で読取）</div></div>
     <h1 style="padding:0 100px;">令和${MONTH.split("-")[0]-2018}年度　安全点検報告書</h1>
