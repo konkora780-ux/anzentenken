@@ -122,11 +122,35 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .shoot:active{background:var(--accentdark);}
 .thumbs{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
 .thumb{position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1.5px solid var(--line);}
-.thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.thumb img{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer;}
 .thumb .del{
   position:absolute; top:2px; right:2px; width:22px; height:22px; border-radius:50%;
   background:rgba(20,20,30,.62); color:#fff; font-size:14px; line-height:22px; text-align:center;
 }
+.thumb .mark-edit{
+  position:absolute; bottom:2px; left:2px; width:22px; height:22px; border-radius:50%;
+  background:rgba(20,20,30,.62); color:#fff; font-size:12px; line-height:22px; text-align:center; border:none;
+}
+.markup-hint{font-size:11.5px; color:#888; margin-top:6px;}
+/* 点検リマインド */
+.remind{padding:12px 14px; border-radius:11px; font-size:13.5px; font-weight:600; margin-bottom:14px; line-height:1.6;}
+.remind.ok{background:#e9f5ee; color:#2e7d4f; border:1.5px solid #b8ddc5;}
+.remind:not(.ok):not(.urge){background:#eef3f9; color:#2b4a6b; border:1.5px solid #cdddf0;}
+.remind b{font-size:15px;}
+.remind.urge{background:#fdeee0; color:#9a5410; border:1.5px solid #f0c89a;}
+/* 印つけエディタ */
+.markup-bg{position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:10000; display:flex; align-items:center; justify-content:center; padding:14px;}
+.markup-box{background:#1a1a22; border-radius:14px; padding:14px; max-width:760px; width:100%; max-height:96vh; overflow:auto;}
+.markup-tools{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
+.mk-tool{padding:10px 16px; border-radius:9px; background:#33333f; color:#fff; font-size:14px; font-weight:700; border:2px solid transparent;}
+.mk-tool.active{background:#e11d1d; border-color:#fff;}
+.mk-undo{padding:10px 14px; border-radius:9px; background:#33333f; color:#fff; font-size:13px; border:none; margin-left:auto;}
+.markup-canvas-wrap{display:flex; justify-content:center; background:#000; border-radius:8px; padding:8px;}
+#markupCanvas{touch-action:none; max-width:100%; border-radius:4px;}
+.markup-btns{display:flex; gap:10px; margin-top:14px; justify-content:flex-end;}
+.markup-btns .mbtn{padding:11px 22px; border-radius:9px; font-size:15px; font-weight:700; border:none;}
+.markup-btns .mcancel{background:#44444f; color:#fff;}
+.markup-btns .msave{background:#e11d1d; color:#fff;}
 .note-input{
   width:100%; margin-top:10px; padding:10px 12px; font-size:14px;
   border:1.5px solid var(--line); border-radius:10px; resize:vertical; min-height:46px; color:var(--ink);
@@ -452,7 +476,13 @@ function monthLabel(key){
   let label=`${y}年${parseInt(m)}月`;
   if(isExtra(key)){
     const day=extraDay(key); const reason=extraReason(key);
-    const dayTxt=day?`${parseInt(day.slice(0,2))}日`:"";
+    // dayは "0625_1430_..." のような形。先頭4文字(MMDD)の後半2桁が「日」
+    let dayTxt="";
+    if(day && day.length>=4){
+      const mm=parseInt(day.slice(0,2));
+      const dd=parseInt(day.slice(2,4));
+      dayTxt=`${mm}月${dd}日`;
+    }
     label+=`（臨時${reason?"・"+reason:""}${dayTxt?" "+dayTxt:""}）`;
   }
   return label;
@@ -833,8 +863,20 @@ function renderFacilityList(){
     });
   });
   const doneCount=list.filter(f=>state.submittedThisMonth.has(f.id)).length;
+  const remain=list.length-doneCount;
+  // リマインド（今月のときだけ・担当がある人だけ）
+  let remind="";
+  if(!locked && list.length>0){
+    if(remain===0){
+      remind=`<div class="remind ok">✓ 担当の場所はすべて提出済みです。ありがとうございます。</div>`;
+    } else {
+      // 月末が近い（25日以降）と強めに
+      const d=new Date(); const late = d.getDate()>=25;
+      remind=`<div class="remind ${late?"urge":""}">${late?"⏰ 今月の点検期限が近づいています。":"📋 "}まだ点検していない場所が <b>${remain}か所</b> あります。${late?"<br>月内に点検をお願いします。":""}</div>`;
+    }
+  }
   app.innerHTML=`${topbar(esc(state.person)+" さん",`${MONTH_LABEL}　${doneCount}/${list.length} か所 提出済み`,"goPersonSelect")}
-  <div class="screen"><p class="lead">${locked?`🔒 ${MONTH_LABEL}は締め切り済みです。内容の確認のみできます。`:"点検する場所を選んでください。提出済みは「修正」や「取り消し」ができます。"}</p>
+  <div class="screen">${remind}<p class="lead">${locked?`🔒 ${MONTH_LABEL}は締め切り済みです。内容の確認のみできます。`:"点検する場所を選んでください。提出済みは「修正」や「取り消し」ができます。"}</p>
     ${html||`<div class="empty">担当の場所がありません。「担当の登録・変更」で登録してください。</div>`}</div>`;
 }
 async function deleteInspection(fid,place){
@@ -882,11 +924,12 @@ async function loadExisting(fid){
 }
 const MARKS=[{key:"ok",sym:"〇",cap:"異常なし",cls:"sel-ok"},{key:"na",sym:"／",cap:"設備なし",cls:"sel-na"},{key:"warn",sym:"△",cap:"要注意",cls:"sel-warn"},{key:"bad",sym:"×",cap:"要修繕",cls:"sel-bad"}];
 function photoZoneHTML(i,ans){
-  const thumbs=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}"><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
+  const thumbs=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}" onclick="openMarkup(${i},${pi})"><button class="mark-edit" onclick="openMarkup(${i},${pi})" title="印をつける">✏️</button><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
   return `<div class="photo-zone"><div class="hint">${ans.mark==="bad"?"要修繕です。写真を撮って記録しましょう。":"気になる点です。写真があると伝わりやすいです。"}</div>
     <button class="shoot" onclick="document.getElementById('cam${i}').click()">📷 写真を撮る・選ぶ</button>
     <input type="file" id="cam${i}" accept="image/*" capture="environment" multiple style="display:none" onchange="addPhoto(${i},this)">
     <div class="thumbs">${thumbs}</div>
+    ${(ans.photos||[]).length?`<div class="markup-hint">写真をタップすると、赤い丸や矢印で印をつけられます</div>`:""}
     <textarea class="note-input" placeholder="状態・場所をメモ（任意）" oninput="setNote(${i},this.value)">${esc(ans.note||"")}</textarea></div>`;
 }
 function renderInspect(){
@@ -960,13 +1003,118 @@ function updateProgress(){
 }
 function setNote(i,v){if(state.answers[i])state.answers[i].note=v;}
 function delPhoto(i,pi){state.answers[i].photos.splice(pi,1);refreshThumbs(i);}
+
+/* ---- 写真への印つけ（赤い丸・矢印） ---- */
+let markupCtx={i:null,pi:null,tool:"circle",shapes:[],img:null,start:null};
+function openMarkup(i,pi){
+  if(!isInspectEditable()){ toast("過去の月は締め切り済みです"); return; }
+  const ans=state.answers[i]; const p=ans.photos[pi];
+  const src=p.dataUrl||p.url;
+  markupCtx={i,pi,tool:"circle",shapes:[],img:null,start:null};
+  const modal=document.createElement("div");
+  modal.className="markup-bg"; modal.id="markupModal";
+  modal.innerHTML=`<div class="markup-box">
+    <div class="markup-tools">
+      <button class="mk-tool active" id="mk-circle" onclick="setMarkupTool('circle')">⭕ 丸</button>
+      <button class="mk-tool" id="mk-arrow" onclick="setMarkupTool('arrow')">↗ 矢印</button>
+      <button class="mk-undo" onclick="markupUndo()">↩ 一つ消す</button>
+    </div>
+    <div class="markup-canvas-wrap"><canvas id="markupCanvas"></canvas></div>
+    <div class="markup-btns">
+      <button class="mbtn mcancel" onclick="closeMarkup()">キャンセル</button>
+      <button class="mbtn msave" onclick="saveMarkup()">この印で保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  const canvas=document.getElementById("markupCanvas");
+  const img=new Image();
+  img.onload=()=>{
+    // 表示サイズに合わせてcanvasを設定（元画像の比率を保つ）
+    const maxW=Math.min(window.innerWidth-40, 700);
+    const scale=maxW/img.width;
+    canvas.width=img.width; canvas.height=img.height;
+    canvas.style.width=maxW+"px"; canvas.style.height=(img.height*scale)+"px";
+    markupCtx.img=img; redrawMarkup();
+    bindMarkupEvents(canvas);
+  };
+  img.src=src;
+}
+function setMarkupTool(t){
+  markupCtx.tool=t;
+  document.getElementById("mk-circle").classList.toggle("active",t==="circle");
+  document.getElementById("mk-arrow").classList.toggle("active",t==="arrow");
+}
+function redrawMarkup(){
+  const canvas=document.getElementById("markupCanvas");if(!canvas)return;
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(markupCtx.img) ctx.drawImage(markupCtx.img,0,0,canvas.width,canvas.height);
+  const lw=Math.max(3, canvas.width/180); // 画像サイズに応じた線の太さ
+  ctx.strokeStyle="#e11d1d"; ctx.fillStyle="#e11d1d"; ctx.lineWidth=lw;
+  markupCtx.shapes.forEach(s=>drawShape(ctx,s,lw));
+}
+function drawShape(ctx,s,lw){
+  if(s.type==="circle"){
+    ctx.beginPath();
+    const rx=Math.abs(s.x2-s.x1)/2, ry=Math.abs(s.y2-s.y1)/2;
+    const cx=(s.x1+s.x2)/2, cy=(s.y1+s.y2)/2;
+    ctx.ellipse(cx,cy,Math.max(rx,6),Math.max(ry,6),0,0,Math.PI*2);
+    ctx.stroke();
+  } else if(s.type==="arrow"){
+    ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
+    // 矢じり
+    const ang=Math.atan2(s.y2-s.y1,s.x2-s.x1); const head=Math.max(14,lw*4);
+    ctx.beginPath();
+    ctx.moveTo(s.x2,s.y2);
+    ctx.lineTo(s.x2-head*Math.cos(ang-Math.PI/6), s.y2-head*Math.sin(ang-Math.PI/6));
+    ctx.lineTo(s.x2-head*Math.cos(ang+Math.PI/6), s.y2-head*Math.sin(ang+Math.PI/6));
+    ctx.closePath(); ctx.fill();
+  }
+}
+function bindMarkupEvents(canvas){
+  const getPos=(e)=>{
+    const r=canvas.getBoundingClientRect();
+    const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    return { x:cx*(canvas.width/r.width), y:cy*(canvas.height/r.height) };
+  };
+  const down=(e)=>{e.preventDefault();markupCtx.start=getPos(e);};
+  const move=(e)=>{
+    if(!markupCtx.start)return; e.preventDefault();
+    const p=getPos(e);
+    redrawMarkup();
+    const ctx=canvas.getContext("2d");
+    drawShape(ctx,{type:markupCtx.tool,x1:markupCtx.start.x,y1:markupCtx.start.y,x2:p.x,y2:p.y},Math.max(3,canvas.width/180));
+  };
+  const up=(e)=>{
+    if(!markupCtx.start)return; e.preventDefault();
+    const p=getPos(e.changedTouches?{touches:e.changedTouches}:e);
+    markupCtx.shapes.push({type:markupCtx.tool,x1:markupCtx.start.x,y1:markupCtx.start.y,x2:p.x,y2:p.y});
+    markupCtx.start=null; redrawMarkup();
+  };
+  canvas.addEventListener("mousedown",down); canvas.addEventListener("mousemove",move); canvas.addEventListener("mouseup",up);
+  canvas.addEventListener("touchstart",down,{passive:false}); canvas.addEventListener("touchmove",move,{passive:false}); canvas.addEventListener("touchend",up,{passive:false});
+}
+function markupUndo(){ markupCtx.shapes.pop(); redrawMarkup(); }
+function closeMarkup(){ const m=document.getElementById("markupModal"); if(m)m.remove(); }
+function saveMarkup(){
+  const canvas=document.getElementById("markupCanvas");
+  if(markupCtx.shapes.length===0){ closeMarkup(); return; } // 何も描いてなければそのまま
+  redrawMarkup();
+  const dataUrl=canvas.toDataURL("image/jpeg",0.72);
+  const {i,pi}=markupCtx;
+  // 印つき画像で置き換え（新規保存扱い）
+  state.answers[i].photos[pi]={dataUrl,uploaded:false};
+  closeMarkup(); refreshThumbs(i);
+  toast("印をつけました");
+}
 function addPhoto(i,input){const files=[...input.files];if(!files.length)return;const a=state.answers[i];a.photos=a.photos||[];let pending=files.length;files.forEach(file=>compressImage(file,1280,0.72).then(d=>{a.photos.push({dataUrl:d,uploaded:false});if(--pending===0)refreshThumbs(i);}));input.value="";}
 // サムネイル部分だけ更新（スクロール維持）
 function refreshThumbs(i){
   const card=document.getElementById("q"+i);if(!card)return;
   const cont=card.querySelector(".thumbs");if(!cont)return;
   const ans=state.answers[i]||{};
-  cont.innerHTML=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}"><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
+  cont.innerHTML=(ans.photos||[]).map((p,pi)=>`<div class="thumb"><img src="${p.dataUrl||p.url}" onclick="openMarkup(${i},${pi})"><button class="mark-edit" onclick="openMarkup(${i},${pi})" title="印をつける">✏️</button><button class="del" onclick="delPhoto(${i},${pi})">×</button></div>`).join("");
 }
 function compressImage(file,maxW,q){return new Promise(res=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{let{width,height}=img;if(width>maxW){height=Math.round(height*maxW/width);width=maxW;}const c=document.createElement("canvas");c.width=width;c.height=height;c.getContext("2d").drawImage(img,0,0,width,height);URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",q));};img.onerror=()=>{URL.revokeObjectURL(url);res(null);};img.src=url;});}
 function dataUrlToBlob(d){const[h,b]=d.split(",");const m=h.match(/:(.*?);/)[1];const bin=atob(b);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:m});}
