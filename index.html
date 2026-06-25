@@ -872,7 +872,7 @@ function renderFacilityList(){
     } else {
       // 月末が近い（25日以降）と強めに
       const d=new Date(); const late = d.getDate()>=25;
-      remind=`<div class="remind ${late?"urge":""}">${late?"⏰ 今月の点検期限が近づいています。":"📋 "}まだ点検していない場所が <b>${remain}か所</b> あります。${late?"<br>月内に点検をお願いします。":""}</div>`;
+      remind=`<div class="remind ${late?"urge":""}">${late?"⏰ 今月の点検期限が近づいています。":"📋 "}まだ点検していない場所が <b>${remain}か所</b> あります。${late?"<br>早めの点検をお願いします。":""}</div>`;
     }
   }
   app.innerHTML=`${topbar(esc(state.person)+" さん",`${MONTH_LABEL}　${doneCount}/${list.length} か所 提出済み`,"goPersonSelect")}
