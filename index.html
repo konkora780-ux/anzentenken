@@ -224,6 +224,32 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .home-card.admin-card .hd{font-size:11.5px;color:#b06b65;}
 .home-card.admin-card .ic, .home-card.admin-card .ic.r, .home-card.admin-card .ic.m{width:44px;height:44px;font-size:22px;background:#f8dcda;opacity:1;}
 .home-card.admin-card:active{border-color:#c0392b;background:#fbe3e2;}
+
+/* 臨時点検 */
+.home-card.extra-card{background:#fff4ec; border:2px solid #e8975a; box-shadow:none; padding:16px 18px;}
+.home-card.extra-card .ht{font-size:17px; color:#b35a14;}
+.home-card.extra-card .hd{font-size:12px; color:#c07a44;}
+.home-card.extra-card .ic.e{width:52px; height:52px; font-size:26px; background:#fbe2cd; display:flex; align-items:center; justify-content:center; border-radius:14px;}
+.home-card.extra-card:active{background:#fdebdd;}
+/* 臨時点検の入口カード（管理者が開始したときホームに出る・目立たせる） */
+.home-card.extra-active-card{background:linear-gradient(135deg,#fff4ec,#ffe8d6); border:2px solid #e8772a; box-shadow:0 2px 10px rgba(232,119,42,.2); padding:20px 18px;}
+.home-card.extra-active-card .ht{font-size:18px; color:#b3490e;}
+.home-card.extra-active-card .hd{font-size:12.5px; color:#c06a30;}
+.home-card.extra-active-card .ic.e{width:54px; height:54px; font-size:28px; background:#fbd5b5; display:flex; align-items:center; justify-content:center; border-radius:14px;}
+.home-card.extra-active-card:active{background:#ffe0c8;}
+/* 管理画面の臨時点検開始ボタン */
+.start-extra-btn{width:100%; padding:15px; border-radius:12px; background:#fff4ec; border:2px solid #e8975a; color:#b35a14; font-size:15px; font-weight:700; margin-bottom:16px;}
+.start-extra-btn:active{background:#fbe2cd;}
+/* 実施中の臨時点検の情報＋取り消し */
+.extra-active-info{background:#fff8f2; border:1.5px solid #e8975a; border-radius:12px; padding:12px 14px; margin-bottom:16px;}
+.eai-label{font-size:13px; font-weight:700; color:#b35a14; margin-bottom:9px; line-height:1.5;}
+.extra-cancel-btn{width:100%; padding:11px; border-radius:9px; background:#fff; border:1.5px solid #d9817a; color:#b53b30; font-size:13.5px; font-weight:700;}
+.extra-cancel-btn:active{background:#fbe7e5;}
+.extra-banner{background:#fff4ec; border:1.5px solid #e8975a; border-radius:12px; padding:13px 15px; margin-bottom:16px; font-size:13.5px; font-weight:700; color:#b35a14; line-height:1.6;}
+.extra-exit{display:block; margin-top:9px; padding:8px 14px; border-radius:8px; background:#fff; border:1.5px solid #e8975a; color:#b35a14; font-size:13px; font-weight:700;}
+.reason-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:8px 0 4px;}
+.reason-btn{padding:16px; border-radius:12px; background:#fff4ec; border:1.5px solid #e8975a; color:#b35a14; font-size:16px; font-weight:700;}
+.reason-btn:active{background:#fbe2cd;}
 .admin-badge{display:inline-block;font-size:11px;font-weight:700;background:rgba(255,255,255,.25);color:#fff;padding:2px 9px;border-radius:99px;margin-left:8px;vertical-align:middle;}
 
 /* ホームアイコン追加色 */
@@ -388,7 +414,7 @@ function currentFiscalYear(){ const d=new Date(); return fiscalYearOf(d.getFullY
 function keepFromFiscalYear(){ return currentFiscalYear()-1; }
 // monthキー("YYYY-MM")が削除対象か（残す下限の年度より前なら削除）
 function isOldMonth(monthKey){
-  const [y,m]=monthKey.split("-").map(Number);
+  const [y,m]=baseMonth(monthKey).split("-").map(Number);
   return fiscalYearOf(y,m) < keepFromFiscalYear();
 }
 let purgeChecked=false;
@@ -415,13 +441,55 @@ async function checkOldRecords(){
     }
   }catch(e){ console.warn("[古い記録の確認] スキップ:",e); }
 }
-function monthLabel(key){const [y,m]=key.split("-");return `${y}年${parseInt(m)}月`;}
+// 月キーが臨時点検かどうか（"2026-06#地震#0615" のように # を含む）
+function isExtra(key){ return String(key).includes("#"); }
+function baseMonth(key){ return String(key).split("#")[0]; } // 臨時でも元の月を返す
+function extraReason(key){ const p=String(key).split("#"); return p.length>1?p[1]:""; }
+function extraDay(key){ const p=String(key).split("#"); return p.length>2?p[2]:""; }
+function monthLabel(key){
+  const base=baseMonth(key);
+  const [y,m]=base.split("-");
+  let label=`${y}年${parseInt(m)}月`;
+  if(isExtra(key)){
+    const day=extraDay(key); const reason=extraReason(key);
+    const dayTxt=day?`${parseInt(day.slice(0,2))}日`:"";
+    label+=`（臨時${reason?"・"+reason:""}${dayTxt?" "+dayTxt:""}）`;
+  }
+  return label;
+}
 // 選択中の月（最初は今月）。点検も閲覧もこの月で動く
 let MONTH = currentMonthKey();
-// 点検そのものを編集できるのは「今月」だけ。過去の月は締め切り（対応記録は別途いつでも編集可）。
-function isInspectEditable(){ return MONTH === currentMonthKey(); }
+// 点検そのものを編集できるか。通常は今月のみ。臨時は開始日＋翌日まで。過去は締め切り。
+function isInspectEditable(){
+  if(isExtra(MONTH)) return isExtraWithinDeadline(MONTH);
+  return baseMonth(MONTH) === currentMonthKey();
+}
 let MONTH_LABEL = monthLabel(MONTH);
 function setMonth(key){ MONTH=key; MONTH_LABEL=monthLabel(key); }
+// 臨時点検を開始する月キーを作る（開始日を含める）
+function makeExtraKey(reason){
+  const d=new Date();
+  const mm=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  const dd=`${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+  const hm=`${String(d.getHours()).padStart(2,"0")}${String(d.getMinutes()).padStart(2,"0")}`;
+  // 期限判定のため、開始の年月日を完全な形でも埋め込む（YYYYMMDD）
+  const ymd=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+  return `${mm}#${reason}#${dd}_${hm}_${ymd}`;
+}
+// 臨時キーから開始日(Date)を取り出す
+function extraStartDate(key){
+  const m=String(key).match(/_(\d{8})$/);
+  if(!m) return null;
+  const s=m[1];
+  return new Date(Number(s.slice(0,4)), Number(s.slice(4,6))-1, Number(s.slice(6,8)));
+}
+// 臨時点検が期限内か（開始日とその翌日まで＝実質2日間）
+function isExtraWithinDeadline(key){
+  const start=extraStartDate(key);
+  if(!start) return false;
+  const deadline=new Date(start); deadline.setDate(deadline.getDate()+1); deadline.setHours(23,59,59,999);
+  return new Date() <= deadline;
+}
 // 月の選択肢: 今月から過去24か月＋翌月まで
 function monthOptions(){
   const opts=[]; const d=new Date(); d.setDate(1);
@@ -522,16 +590,37 @@ function topbar(title,sub,backFn){return `<div class="topbar">${backFn?`<button 
 /* ---- ホーム ---- */
 function renderHome(){
   const opts=monthOptions().map(k=>`<option value="${k}" ${k===MONTH?"selected":""}>${monthLabel(k)}</option>`).join("");
-  app.innerHTML=`
-  ${topbar("安全点検", "点検する月を選べます")}
-  <div class="screen">
-    <div class="month-picker">
+  const inExtra = isExtra(MONTH); // いま臨時点検モードで操作中
+  // アクティブな臨時点検（期限内・管理者が開始したもの）
+  const activeKey = ACTIVE_EXTRA && isExtraWithinDeadline(ACTIVE_EXTRA) ? ACTIVE_EXTRA : null;
+
+  let topArea;
+  if(inExtra){
+    topArea=`<div class="extra-banner">⚠️ いま「${MONTH_LABEL}」の臨時点検をしています。<button class="extra-exit" onclick="exitExtra()">通常の点検に戻る</button></div>`;
+  } else {
+    topArea=`<div class="month-picker">
       <label>点検・確認する月</label>
       <select class="month-select" onchange="onMonthChange(this.value)">${opts}</select>
-    </div>
+    </div>`;
+  }
+
+  // アクティブな臨時点検の入口（管理者が開始したときだけ出る／点検する先生も使える）
+  let extraEntry="";
+  if(activeKey && !inExtra){
+    const reason=extraReason(activeKey);
+    extraEntry=`<button class="home-card extra-active-card" onclick="enterActiveExtra()">
+      <div class="ic e">⚠️</div>
+      <div><div class="ht">臨時点検をする</div><div class="hd">${reason?esc(reason)+"のあとの点検":"臨時点検"}　タップして始めます</div></div></button>`;
+  }
+
+  app.innerHTML=`
+  ${topbar("安全点検", inExtra?"臨時点検モードです":"点検する月を選べます")}
+  <div class="screen">
+    ${topArea}
+    ${extraEntry}
     <p class="lead">点検する先生は、上の大きなボタンから始めてください。</p>
     <button class="home-card primary-card" onclick="goPersonSelect()"><div class="ic t">📋</div>
-      <div><div class="ht">点検する（担当の先生）</div><div class="hd">自分の名前を選んで点検します</div></div></button>
+      <div><div class="ht">点検する（担当の先生）</div><div class="hd">${inExtra?"臨時点検をします":"自分の名前を選んで点検します"}</div></div></button>
     <div class="admin-divider"><span>▼ 管理・設定（担当の先生や係の先生向け）</span></div>
     <button class="home-card admin-card" onclick="goRegister()"><div class="ic r">🧑‍🏫</div>
       <div><div class="ht">担当の登録・変更</div><div class="hd">年度初めに、担当する場所を登録します</div></div></button>
@@ -540,6 +629,24 @@ function renderHome(){
     ${ sb?"":`<div class="setup-warn" style="margin-top:20px"><b>準備中：</b> いまは保存先（Supabase）が未設定です。操作は試せますが保存されません。app.js の <b>SUPABASE_ANON_KEY</b> を設定すると保存できます。</div>`}
   </div>`;
 }
+// 臨時点検の入口を押したとき（点検する先生用）
+function enterExtra(key){ setMonth(key); render(); }
+
+// いま有効な臨時点検（期限内のもの）。ホームに入口を出すため起動時に読む。
+let ACTIVE_EXTRA=null;
+async function loadActiveExtra(){
+  ACTIVE_EXTRA=null; if(!sb) return;
+  try{
+    const { data, error }=await sb.from("inspections").select("month");
+    if(error||!data) return;
+    const extras=[...new Set(data.map(r=>r.month).filter(isExtra))];
+    // 期限内のものだけ。複数あれば最も新しい開始のものを採用
+    const active=extras.filter(isExtraWithinDeadline).sort((a,b)=>{
+      const da=extraStartDate(a), db=extraStartDate(b); return (db?db:0)-(da?da:0);
+    });
+    if(active.length) ACTIVE_EXTRA=active[0];
+  }catch(e){ console.warn("アクティブ臨時点検の読込",e); }
+}
 // 管理画面に入るときのワンクッション（機能2）
 function enterTeacher(){
   if(confirm("管理用の画面を開きます。\n（点検状況の確認や、施設・先生・項目の設定ができます）\n\nよろしいですか？")){
@@ -547,6 +654,89 @@ function enterTeacher(){
   }
 }
 function onMonthChange(key){ setMonth(key); }
+
+/* ---- 臨時点検 ---- */
+function startExtra(){
+  // きっかけを選ぶモーダル
+  const reasons=["地震","台風","大雨","大雪","強風","その他"];
+  const btns=reasons.map(r=>`<button class="reason-btn" onclick="pickExtraReason('${r}')">${r}</button>`).join("");
+  const modal=document.createElement("div");
+  modal.className="modal-bg"; modal.id="extraModal";
+  modal.innerHTML=`<div class="modal">
+    <div class="modal-h">⚠️ 臨時点検をはじめます</div>
+    <div class="modal-sub">地震や台風などのあと、臨時で安全点検をします。<br>きっかけを選んでください。</div>
+    <div class="reason-grid">${btns}</div>
+    <div class="modal-btns"><button class="mbtn mcancel" onclick="closeExtraModal()">キャンセル</button></div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function closeExtraModal(){const m=document.getElementById("extraModal");if(m)m.remove();}
+function pickExtraReason(reason){
+  if(reason==="その他"){
+    const t=prompt("臨時点検のきっかけを入力してください（例：地震 震度5弱）");
+    if(!t||!t.trim()){ return; }
+    reason=t.trim().replace(/[#]/g,"");  // キーに使えない文字を除去
+  }
+  closeExtraModal();
+  const key=makeExtraKey(reason);
+  ACTIVE_EXTRA=key;            // ホームに入口を出すため記録
+  setMonth(currentMonthKey()); // いったん通常に戻す（入口から入る形にする）
+  state.screen="home";
+  toast(`臨時点検を始めました。ホームの「臨時点検」から点検できます`);
+  render();
+}
+// ホームのアイコン／管理から、臨時点検モードに入る
+function enterActiveExtra(){
+  if(ACTIVE_EXTRA && isExtraWithinDeadline(ACTIVE_EXTRA)){
+    setMonth(ACTIVE_EXTRA);
+    state.screen="person"; // すぐ名前選択へ（通常の点検と同じ流れ）
+    loadAssignments().then(()=>render());
+    render();
+  } else {
+    toast("実施できる臨時点検がありません（期限切れの可能性）");
+    ACTIVE_EXTRA=null; render();
+  }
+}
+function exitExtra(){
+  setMonth(currentMonthKey());
+  toast("通常の点検に戻りました");
+  render();
+}
+// 臨時点検を取り消す（管理者のみ・管理画面から）
+async function cancelExtra(key){
+  // すでに点検された件数を確認
+  let count=0;
+  if(sb){
+    try{
+      const { data }=await sb.from("inspections").select("facility_id").eq("month",key);
+      count = data ? data.length : 0;
+    }catch(e){ console.warn(e); }
+  }
+  const label=monthLabel(key);
+  let msg=`「${label}」の臨時点検を取り消します。\n\n`;
+  if(count>0){
+    msg+=`⚠️ すでに ${count}か所 が点検済みです。\n取り消すと、この臨時点検の記録（点検・対応）はすべて削除されます。\n\n`;
+  } else {
+    msg+=`まだ点検は行われていません。\n\n`;
+  }
+  msg+=`この操作は取り消せません。よろしいですか？`;
+  if(!confirm(msg)) return;
+  // 点検済みがある場合は二段階確認
+  if(count>0){
+    if(!confirm(`本当に削除してよろしいですか？\n\n${count}か所分の臨時点検の記録が完全に削除されます。`)) return;
+  }
+  if(sb){
+    try{
+      await sb.from("inspections").delete().eq("month",key);
+      await sb.from("repairs").delete().eq("month",key);
+    }catch(e){ console.error(e); toast("取り消しに失敗しました。電波を確認してください"); return; }
+  }
+  if(ACTIVE_EXTRA===key) ACTIVE_EXTRA=null;
+  if(MONTH===key) setMonth(currentMonthKey());
+  await loadExtraKeys();
+  toast("臨時点検を取り消しました");
+  goTeacher();
+}
 
 /* ---- 担当登録 ---- */
 async function goRegister(){state.screen="register";state.regPerson=null;state.regSel=new Set();if(!assignLoaded)await loadAssignments();render();}
@@ -800,7 +990,16 @@ async function submitInspection(){
 
 /* ---- 教師ダッシュボード（対応記録・履歴対応） ---- */
 let REPAIRS={}; // key: `${facility_id}_${itemIndex}` -> {status, note, person, updated_at}
-async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!itemsLoaded)await loadItems();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadAllRecords();await loadRepairs();render();checkOldRecords();}
+// 実施済みの臨時点検キーを保持（管理画面の月選択に出す）
+let EXTRA_KEYS=[];
+async function loadExtraKeys(){
+  EXTRA_KEYS=[]; if(!sb) return;
+  try{
+    const { data, error }=await sb.from("inspections").select("month");
+    if(!error&&data){ EXTRA_KEYS=[...new Set(data.map(r=>r.month).filter(isExtra))].sort().reverse(); }
+  }catch(e){ console.warn("臨時キー読込",e); }
+}
+async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!itemsLoaded)await loadItems();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadExtraKeys();await loadAllRecords();await loadRepairs();render();checkOldRecords();}
 async function loadAllRecords(){state.records=[];if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("month",MONTH);if(!error&&data)state.records=data.map(r=>({...r,answers:typeof r.answers==="string"?JSON.parse(r.answers):r.answers}));}catch(e){console.warn(e);}}
 async function loadRepairs(){
   REPAIRS={}; if(!sb) return;
@@ -848,9 +1047,19 @@ function renderTeacher(){
     if(!unassigned.length)body=`<div class="empty" style="color:var(--ok)">未割当の場所はありません。全施設に担当者がいます。</div>`;
     else{const byBlock={};unassigned.forEach(f=>{(byBlock[f.block]=byBlock[f.block]||[]).push(f);});body=`<div class="setup-warn">担当者がまだ決まっていない場所です。先生に「担当の登録・変更」から登録してもらってください。</div>`+Object.keys(byBlock).map(block=>{const rows=byBlock[block].map(f=>`<div class="fac-row"><div><div class="fp">${esc(f.place)}</div></div><span class="badge issue">未割当</span></div>`).join("");return `<div class="block-label">${esc(block)}</div>${rows}`;}).join("");}
   }
-  const monthOpts=monthOptions().map(k=>`<option value="${k}" ${k===MONTH?"selected":""}>${monthLabel(k)}</option>`).join("");
+  // 通常の月＋実施済みの臨時点検を選択肢に
+  const normalOpts=monthOptions();
+  const allKeys=[...EXTRA_KEYS, ...normalOpts.filter(k=>!EXTRA_KEYS.includes(k))];
+  // 現在のMONTHが一覧になければ加える
+  if(!allKeys.includes(MONTH)) allKeys.unshift(MONTH);
+  const monthOpts=allKeys.map(k=>`<option value="${k}" ${k===MONTH?"selected":""}>${monthLabel(k)}</option>`).join("");
   app.innerHTML=`${topbar("点検状況 <span class='admin-badge'>管理用</span>",null,"goHome")}
   <div class="screen">
+    <button class="start-extra-btn" onclick="startExtra()">⚠️ 臨時点検を始める（地震・台風などのあと）</button>
+    ${ACTIVE_EXTRA && isExtraWithinDeadline(ACTIVE_EXTRA)?`<div class="extra-active-info">
+      <div class="eai-label">⚠️ 実施中の臨時点検：${esc(monthLabel(ACTIVE_EXTRA))}</div>
+      <button class="extra-cancel-btn" onclick="cancelExtra('${ACTIVE_EXTRA}')">この臨時点検を取り消す</button>
+    </div>`:""}
     <div class="month-picker compact month-row">
       <select class="month-select" onchange="onTeacherMonthChange(this.value)">${monthOpts}</select>
       <button class="print-btn" onclick="printMonthReport()" title="この月の報告書を印刷">🖨️ 印刷</button>
@@ -982,7 +1191,7 @@ async function printMonthReport(){
   <div class="print-toparea"></div>
   <div class="rep-header">
     <div class="qr-box"><div id="qrcode"></div><div class="qr-label">アプリで確認<br>（iPad等で読取）</div></div>
-    <h1 style="padding:0 100px;">令和${MONTH.split("-")[0]-2018}年度　安全点検報告書</h1>
+    <h1 style="padding:0 100px;">令和${baseMonth(MONTH).split("-")[0]-2018}年度　${isExtra(MONTH)?"臨時 ":""}安全点検報告書</h1>
     <div class="sub">対象月：${MONTH_LABEL}　／　作成日：${todayStr}</div>
   </div>
   <div class="stat-row">
@@ -1451,7 +1660,7 @@ function render(){
   if(state.screen!=="inspect") window.scrollTo(0,0);
   switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();case "facManage":return renderFacManage();case "personManage":return renderPersonManage();case "itemManage":return renderItemManage();}
 }
-(async()=>{await loadFacilities();await loadStaff();await loadItems();await loadAssignments();render();})();
+(async()=>{await loadFacilities();await loadStaff();await loadItems();await loadAssignments();await loadActiveExtra();render();})();
 
 </script>
 </body>
