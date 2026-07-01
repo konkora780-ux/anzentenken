@@ -401,8 +401,8 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 <div id="app"></div>
 <div class="toast" id="toast"></div>
 <script>
-const FACILITIES_SEED = [{"id": 0, "person": "高橋 晃", "block": "南校舎棟１F", "place": "校長室"}, {"id": 1, "person": "高橋 晃", "block": "南校舎棟１F", "place": "事務室"}, {"id": 2, "person": "鈴木 野乃香", "block": "南校舎棟１F", "place": "職員・来客玄関ポーチ"}, {"id": 3, "person": "鈴木 野乃香", "block": "北校舎棟１F", "place": "消火栓ポンプ室"}, {"id": 4, "person": "細川 功", "block": "南校舎棟１F", "place": "技能職員室"}, {"id": 5, "person": "細川 功", "block": "南校舎棟１F", "place": "職員トイレ(男)"}, {"id": 6, "person": "細川 功", "block": "北校舎棟１F", "place": "LPGボンベ庫・ゴミ置き場"}, {"id": 7, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "放送室"}, {"id": 8, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "視聴覚室"}, {"id": 9, "person": "玉山 幸平", "block": "南校舎棟２F", "place": "パソコン室"}, {"id": 10, "person": "村上 みさと", "block": "南校舎棟１F", "place": "職員室(小中分)"}, {"id": 11, "person": "村上 みさと", "block": "南校舎棟１F", "place": "湯沸室"}, {"id": 12, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "倉庫(職員室前)"}, {"id": 13, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "階段(職員室前)"}, {"id": 14, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "会議室"}, {"id": 15, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "教育相談室"}, {"id": 16, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "書庫"}, {"id": 17, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "エレベーター"}, {"id": 18, "person": "伊藤 弘美", "block": "南校舎棟２F", "place": "教材室（印刷室関係）"}, {"id": 19, "person": "星野 美和子", "block": "南校舎棟１F", "place": "支援室"}, {"id": 20, "person": "星野 美和子", "block": "南校舎棟１F", "place": "廊下(放送室前～EVホール～教材室)"}, {"id": 21, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "保健室"}, {"id": 22, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "倉庫(理科室隣)"}, {"id": 23, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "医療的ケア室"}, {"id": 24, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "小学部5年２組・6年2組"}, {"id": 25, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "児童生徒トイレ(男子)"}, {"id": 26, "person": "湊 敬子", "block": "南校舎棟１F", "place": "小学部１年１組"}, {"id": 27, "person": "湊 敬子", "block": "南校舎棟１F", "place": "職員更衣室(女)"}, {"id": 28, "person": "細越 捺美", "block": "南校舎棟１F", "place": "小学部1年2組・2年2組・4年3組"}, {"id": 29, "person": "細越 捺美", "block": "南校舎棟１F", "place": "多目的トイレ"}, {"id": 30, "person": "細越 捺美", "block": "南校舎棟１F", "place": "シャワー室"}, {"id": 31, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "小学部2年1組"}, {"id": 32, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "階段(理科室隣)"}, {"id": 33, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "個別学習室１（小学部）"}, {"id": 34, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "教材室１"}, {"id": 35, "person": "近藤 史隆", "block": "南校舎棟１F", "place": "体育館渡り廊下・ホール・トイレ"}, {"id": 36, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "生徒トイレ(男子)"}, {"id": 37, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "個別学習室２（高等部）"}, {"id": 38, "person": "菊池 健斗", "block": "南校舎棟１F", "place": "体育館"}, {"id": 39, "person": "菊池 健斗", "block": "屋外", "place": "グラウンド（遊具等）"}, {"id": 40, "person": "荒木 沙也香", "block": "南校舎棟１F", "place": "図工室（準備室）"}, {"id": 41, "person": "荒木 沙也香", "block": "南校舎棟２F", "place": "中学部３年１組"}, {"id": 42, "person": "竹澤 里栄", "block": "南校舎棟１F", "place": "理科室（準備室）"}, {"id": 43, "person": "竹澤 里栄", "block": "南校舎棟２F", "place": "図書室"}, {"id": 44, "person": "吉田 好子", "block": "南校舎棟１F", "place": "児童生徒トイレ(女子)"}, {"id": 45, "person": "吉田 好子", "block": "南校舎棟１F", "place": "プレイルーム・ホール・渡り廊下"}, {"id": 46, "person": "高橋 天地", "block": "南校舎棟１F", "place": "職員更衣室(男)"}, {"id": 47, "person": "高橋 天地", "block": "南校舎棟２F", "place": "中学部１年１組"}, {"id": 48, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "職員トイレ(女)"}, {"id": 49, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "テラス"}, {"id": 50, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "児童生徒昇降口・ポーチ"}, {"id": 51, "person": "臼澤 育子", "block": "南校舎棟１F", "place": "給食配膳室"}, {"id": 52, "person": "千田 一輝", "block": "北校舎棟１F", "place": "高等部工芸室"}, {"id": 53, "person": "千田 一輝", "block": "北校舎棟２F", "place": "高等部３年１組"}, {"id": 54, "person": "千葉 登志美", "block": "北校舎棟１F", "place": "高等部紙工室"}, {"id": 55, "person": "千葉 登志美", "block": "北校舎棟２F", "place": "生徒更衣室(女)"}, {"id": 56, "person": "阿部 良利", "block": "北校舎棟１F", "place": "高等部作業室"}, {"id": 57, "person": "阿部 良利", "block": "北校舎棟２F", "place": "生徒トイレ(男子)"}, {"id": 58, "person": "城内 美沙", "block": "北校舎棟１F", "place": "家庭科室（準備室・作法室）"}, {"id": 59, "person": "城内 美沙", "block": "南校舎棟２F", "place": "中学部調理室（準備室）"}, {"id": 60, "person": "古戸 優望", "block": "北校舎棟１F", "place": "階段(トイレ前)"}, {"id": 61, "person": "古戸 優望", "block": "北校舎棟２F", "place": "高等部２年２組"}, {"id": 62, "person": "福士 優", "block": "北校舎棟１F", "place": "生徒トイレ(女子)"}, {"id": 63, "person": "福士 優", "block": "北校舎棟２F", "place": "職員トイレ(女)"}, {"id": 64, "person": "高橋 珠", "block": "北校舎棟１F", "place": "多目的トイレ"}, {"id": 65, "person": "高橋 珠", "block": "北校舎棟１F", "place": "シャワー室"}, {"id": 66, "person": "畠山 麻優香", "block": "北校舎棟１F", "place": "廊下・プール渡り廊下"}, {"id": 67, "person": "畠山 麻優香", "block": "北校舎棟２F", "place": "高等部1年1組"}, {"id": 68, "person": "工藤 柊", "block": "北校舎棟１F", "place": "プール"}, {"id": 69, "person": "工藤 柊", "block": "南校舎棟２F", "place": "中学部２年１組"}, {"id": 70, "person": "阿部 藍", "block": "北校舎棟１F", "place": "高等部２年３組"}, {"id": 71, "person": "阿部 藍", "block": "北校舎棟１F", "place": "個別学習室１（高等部）"}, {"id": 72, "person": "那須 星香", "block": "南校舎棟２F", "place": "中学部２年２組"}, {"id": 73, "person": "那須 星香", "block": "南校舎棟２F", "place": "多目的トイレ"}, {"id": 74, "person": "那須 星香", "block": "南校舎棟２F", "place": "シャワー室"}, {"id": 75, "person": "志田 望", "block": "南校舎棟２F", "place": "中学部紙工室（準備室）"}, {"id": 76, "person": "志田 望", "block": "南校舎棟２F", "place": "児童生徒トイレ(男子)"}, {"id": 77, "person": "志田 望", "block": "南校舎棟２F", "place": "生徒更衣室(男子)"}, {"id": 78, "person": "村上 綾", "block": "南校舎棟２F", "place": "教材室２"}, {"id": 79, "person": "村上 綾", "block": "南校舎棟２F", "place": "個別学習室１(中学部)"}, {"id": 80, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "個別学習室２(中学部)"}, {"id": 81, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "廊下(教材室～音楽室)"}, {"id": 82, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "個別学習室２（小学部）"}, {"id": 83, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "屋外階段１・避難滑り台"}, {"id": 84, "person": "中家 夏海", "block": "南校舎棟２F", "place": "小学部4年1組"}, {"id": 85, "person": "中家 夏海", "block": "南校舎棟２F", "place": "音楽室（準備室）"}, {"id": 86, "person": "久保 美紀", "block": "南校舎棟２F", "place": "小学部３年１組"}, {"id": 87, "person": "久保 美紀", "block": "南校舎棟２F", "place": "廊下(渡り廊下～北校舎階段横廊下)"}, {"id": 88, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "小学部4年2組・5年1組・6年1組"}, {"id": 89, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "バルコニー"}, {"id": 90, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "児童生徒トイレ(女子)"}, {"id": 91, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "生徒更衣室(女子)"}, {"id": 92, "person": "柏山 典子", "block": "北校舎棟２F", "place": "高等部２年1組"}, {"id": 93, "person": "柏山 典子", "block": "北校舎棟２F", "place": "教材室４"}, {"id": 94, "person": "千葉 智子", "block": "北校舎棟２F", "place": "職員室(高)"}, {"id": 95, "person": "千葉 智子", "block": "北校舎棟２F", "place": "湯沸室"}, {"id": 96, "person": "中條 広一", "block": "北校舎棟２F", "place": "屋外階段２"}, {"id": 97, "person": "中條 広一", "block": "北校舎棟２F", "place": "廊下(職員室前～生徒用トイレ前)"}, {"id": 98, "person": "新沼 千明", "block": "北校舎棟２F", "place": "生徒トイレ(女子)"}, {"id": 99, "person": "新沼 千明", "block": "北校舎棟２F", "place": "多目的トイレ"}, {"id": 100, "person": "新沼 千明", "block": "北校舎棟２F", "place": "シャワー室"}, {"id": 101, "person": "新沼 千明", "block": "屋外", "place": "部室棟"}, {"id": 102, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "職員トイレ(男)"}, {"id": 103, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "生徒更衣室(男)"}, {"id": 104, "person": "太田 綾", "block": "釜石病院校舎", "place": "学習室１"}, {"id": 105, "person": "太田 綾", "block": "釜石病院校舎", "place": "洗面室"}, {"id": 106, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "学習室２"}, {"id": 107, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "男子トイレ・シャワー室"}, {"id": 108, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "階段"}, {"id": 109, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "学習室３"}, {"id": 110, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "教材室"}, {"id": 111, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "女子トイレ"}];
-const PERSONS_SEED = ["高橋 晃", "鈴木 野乃香", "細川 功", "玉山 幸平", "村上 みさと", "熊谷 美早紀", "菊池 いずみ", "伊藤 弘美", "星野 美和子", "村木 ゆき", "浅沼 樹", "湊 敬子", "細越 捺美", "大澤 美咲", "佐々木 尚子", "近藤 史隆", "菊池 健斗", "荒木 沙也香", "竹澤 里栄", "吉田 好子", "高橋 天地", "佐藤 暢子", "臼澤 育子", "千田 一輝", "千葉 登志美", "阿部 良利", "城内 美沙", "古戸 優望", "福士 優", "高橋 珠", "畠山 麻優香", "工藤 柊", "阿部 藍", "那須 星香", "志田 望", "村上 綾", "長野 和歌子", "岩渕 正子", "中家 夏海", "久保 美紀", "袴田 まどか", "千崎 友里子", "柏山 典子", "千葉 智子", "中條 広一", "新沼 千明", "斎藤 道幸", "太田 綾", "小水内 光浩", "小笠原 早苗"];
+const FACILITIES_SEED = [];
+const PERSONS_SEED = [];
 const ITEMS_SEED = ["床の浮きや破損はないか", "床が滑りやすく、転倒の危険はないか", "棚の上から落ちそうな危険な物はないか／棚はきちんと固定されているか", "黒板・掲示物の取り付けは安全か", "天井・壁に破損はないか", "TV・教具等の備品設置場所は適切か", "窓やガラスがはずれやすくなっている箇所や破損はないか", "机・椅子・棚類の破損はないか", "敷居のレール及び戸や鍵は安全か", "通路や出入り口付近は歩きやすく安全か", "ベランダの破損や異状はないか", "非常時の退避口の状況はよいか", "手洗い場付近は清潔で安全か", "階段の手すりに異状はないか", "スイッチ・コンセント等に異状はないか", "照明及び電気器具に異状はないか", "暖房器具の破損、異状はないか", "ガスコンロ、湯沸かし器の異状、管の傷みはないか", "消火器の周りにじゃまなものはないか", "清掃用具置き場は整理され、衛生的か"];
 
 </script>
@@ -419,8 +419,8 @@ const ITEMS_SEED = ["床の浮きや破損はないか", "床が滑りやすく�
      - Supabaseの assignments に保存があればそちらを優先
    ============================================================ */
 
-const SUPABASE_URL = "https://glxszbwsvembyygocekp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdseHN6YndzdmVtYnl5Z29jZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MDA5MzEsImV4cCI6MjA5NzE3NjkzMX0.Me73xDBFtOsNZ6ZRZZH8TNeXfwpiYvPBlplh4kRPsds";
+const SUPABASE_URL = "ここに自分の学校のProject URLを貼る";
+const SUPABASE_ANON_KEY = "ここに自分の学校のanonキーを貼る";
 const BUCKET = "inspection-photos";
 
 let sb = null;
@@ -1604,7 +1604,7 @@ function renderPersonManage(){
   app.innerHTML=`${topbar("担当の先生の管理",`${persons.length}人`,"goTeacher")}
   <div class="screen">
     <div class="setup-warn" style="background:#eef3f9;border-color:#cdddf0;color:#2b4a6b">
-      <b>名前変更</b>＝名前を直す（誤字修正）。<b>引き継ぎ</b>＝転勤などで担当を別の先生にまるごと渡す。<b>削除</b>＝名簿から消す（担当があるときは先に引き継いでください）。
+      <b>名前変更</b>＝名前を直す（誤字修正）。<b>引き継ぎ</b>＝転勤などで担当を別の先生にまるごと渡す。<b>削除</b>＝名簿から消す（担当があってもそのまま削除でき、その場所は担当なしになります）。
     </div>
     <button class="manage-fac-btn person" onclick="openPersonAdd()">＋ 先生を追加する</button>
     ${html}
@@ -1645,17 +1645,25 @@ async function savePersonAdd(){
 // 先生の削除
 async function deletePerson(name){
   const list=facilitiesOfPerson(name);
+  let msg=`⚠️ 先生の削除\n\n「${name}」を名簿から削除します。\n\n`;
   if(list.length){
-    alert(`「${name}」は${list.length}か所を担当しています。\n先に「引き継ぎ」で担当を別の先生に渡してから削除してください。`);
-    return;
+    msg+=`この先生は今 ${list.length}か所 を担当しています。\n削除すると、その場所は「担当なし」になります（共同担当がいる場所は、残りの先生がそのまま担当します）。\nあとで「担当の登録・変更」から割り当て直してください。\n\n`;
   }
-  if(!confirm(`⚠️ 先生の削除\n\n「${name}」を名簿から削除します。\n\nこの操作は管理者向けです。よろしいですか？`)) return;
-  STAFF=STAFF.filter(p=>p!==name);
+  msg+=`この操作は管理者向けです。よろしいですか？`;
+  if(!confirm(msg)) return;
+  // 担当からこの先生を外す（共同担当は残す）
+  list.forEach(f=>{ ASSIGN[f.id]=personsOf(f.id).filter(p=>p!==name); });
   if(sb){
-    try{ const {error}=await sb.from("staff").delete().eq("name",name); if(error)throw error; }
-    catch(e){ console.error(e); toast("削除に失敗しました"); return; }
+    try{
+      if(list.length){
+        const rows=list.map(f=>({facility_id:f.id,place:f.place,block:f.block,person:personsOf(f.id).join("・")}));
+        const {error:aerr}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"}); if(aerr)throw aerr;
+      }
+      const {error}=await sb.from("staff").delete().eq("name",name); if(error)throw error;
+    }catch(e){ console.error(e); toast("削除に失敗しました"); await loadAssignments(); return; }
   }
-  toast("先生を削除しました");
+  STAFF=STAFF.filter(p=>p!==name);
+  toast(list.length?`先生を削除しました（${list.length}か所が担当なしになりました）`:"先生を削除しました");
   render();
 }
 
