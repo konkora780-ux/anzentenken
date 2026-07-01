@@ -145,6 +145,9 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 .mk-tool{padding:10px 16px; border-radius:9px; background:#33333f; color:#fff; font-size:14px; font-weight:700; border:2px solid transparent;}
 .mk-tool.active{background:#e11d1d; border-color:#fff;}
 .mk-undo{padding:10px 14px; border-radius:9px; background:#33333f; color:#fff; font-size:13px; border:none; margin-left:auto;}
+.mk-wlabel{align-self:center; color:#bbb; font-size:13px; margin-right:2px;}
+.mk-w{padding:8px 15px; border-radius:9px; background:#33333f; color:#fff; font-size:14px; font-weight:700; border:2px solid transparent;}
+.mk-w.active{background:#e11d1d; border-color:#fff;}
 .markup-canvas-wrap{display:flex; justify-content:center; background:#000; border-radius:8px; padding:8px;}
 #markupCanvas{touch-action:none; max-width:100%; border-radius:4px;}
 .markup-btns{display:flex; gap:10px; margin-top:14px; justify-content:flex-end;}
@@ -1005,19 +1008,28 @@ function setNote(i,v){if(state.answers[i])state.answers[i].note=v;}
 function delPhoto(i,pi){state.answers[i].photos.splice(pi,1);refreshThumbs(i);}
 
 /* ---- 写真への印つけ（赤い丸・矢印） ---- */
-let markupCtx={i:null,pi:null,tool:"circle",shapes:[],img:null,start:null};
+let markupCtx={i:null,pi:null,tool:"circle",weight:1,shapes:[],img:null,start:null};
 function openMarkup(i,pi){
   if(!isInspectEditable()){ toast("過去の月は締め切り済みです"); return; }
   const ans=state.answers[i]; const p=ans.photos[pi];
   const src=p.dataUrl||p.url;
-  markupCtx={i,pi,tool:"circle",shapes:[],img:null,start:null};
+  markupCtx={i,pi,tool:"circle",weight:1,shapes:[],img:null,start:null};
   const modal=document.createElement("div");
   modal.className="markup-bg"; modal.id="markupModal";
   modal.innerHTML=`<div class="markup-box">
     <div class="markup-tools">
       <button class="mk-tool active" id="mk-circle" onclick="setMarkupTool('circle')">⭕ 丸</button>
       <button class="mk-tool" id="mk-arrow" onclick="setMarkupTool('arrow')">↗ 矢印</button>
-      <button class="mk-undo" onclick="markupUndo()">↩ 一つ消す</button>
+      <button class="mk-undo" onclick="markupReset()">↺ 描き直す</button>
+    </div>
+    <div class="markup-hint" style="color:#bbb;margin:-4px 0 10px">印は1つだけ。ドラッグで移動、2本指のピンチで拡大・縮小できます（PCはマウスのホイール）。丸・矢印はいつでも切り替え可。</div>
+    <div class="markup-tools" style="margin-top:-4px">
+      <span class="mk-wlabel">太さ</span>
+      <button class="mk-w" id="mk-w-thin" onclick="setMarkupWeight(0.6)">細</button>
+      <button class="mk-w active" id="mk-w-mid" onclick="setMarkupWeight(1)">ふつう</button>
+      <button class="mk-w" id="mk-w-bold" onclick="setMarkupWeight(1.8)">太</button>
+      <button class="mk-w" id="mk-w-xbold" onclick="setMarkupWeight(2.8)">極太</button>
+      <button class="mk-w" id="mk-w-xxbold" onclick="setMarkupWeight(4.2)">特太</button>
     </div>
     <div class="markup-canvas-wrap"><canvas id="markupCanvas"></canvas></div>
     <div class="markup-btns">
@@ -1043,13 +1055,21 @@ function setMarkupTool(t){
   markupCtx.tool=t;
   document.getElementById("mk-circle").classList.toggle("active",t==="circle");
   document.getElementById("mk-arrow").classList.toggle("active",t==="arrow");
+  if(markupCtx.shapes && markupCtx.shapes.length){ markupCtx.shapes[0].type=t; redrawMarkup(); }
+}
+function mkLineWidth(canvas){ return Math.max(2, canvas.width/180 * (markupCtx.weight||1)); }
+const MK_WEIGHTS=[{id:"mk-w-thin",w:0.6},{id:"mk-w-mid",w:1},{id:"mk-w-bold",w:1.8},{id:"mk-w-xbold",w:2.8},{id:"mk-w-xxbold",w:4.2}];
+function setMarkupWeight(w){
+  markupCtx.weight=w;
+  MK_WEIGHTS.forEach(o=>{const el=document.getElementById(o.id); if(el) el.classList.toggle("active", o.w===w);});
+  redrawMarkup();
 }
 function redrawMarkup(){
   const canvas=document.getElementById("markupCanvas");if(!canvas)return;
   const ctx=canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
   if(markupCtx.img) ctx.drawImage(markupCtx.img,0,0,canvas.width,canvas.height);
-  const lw=Math.max(3, canvas.width/180); // 画像サイズに応じた線の太さ
+  const lw=mkLineWidth(canvas); // 選択した太さ×画像サイズ
   ctx.strokeStyle="#e11d1d"; ctx.fillStyle="#e11d1d"; ctx.lineWidth=lw;
   markupCtx.shapes.forEach(s=>drawShape(ctx,s,lw));
 }
@@ -1078,24 +1098,89 @@ function bindMarkupEvents(canvas){
     const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
     return { x:cx*(canvas.width/r.width), y:cy*(canvas.height/r.height) };
   };
-  const down=(e)=>{e.preventDefault();markupCtx.start=getPos(e);};
-  const move=(e)=>{
-    if(!markupCtx.start)return; e.preventDefault();
+  let mode=null, dragStart=null, dragOrig=null;
+  const down=(e)=>{
+    e.preventDefault();
     const p=getPos(e);
-    redrawMarkup();
-    const ctx=canvas.getContext("2d");
-    drawShape(ctx,{type:markupCtx.tool,x1:markupCtx.start.x,y1:markupCtx.start.y,x2:p.x,y2:p.y},Math.max(3,canvas.width/180));
+    if(markupCtx.shapes.length===0){ mode="draw"; markupCtx.start=p; }   // まだ印がない→新しく描く
+    else { mode="move"; dragStart=p; dragOrig={...markupCtx.shapes[0]}; } // すでに印がある→動かす
+  };
+  const move=(e)=>{
+    e.preventDefault();
+    const p=getPos(e);
+    if(mode==="draw" && markupCtx.start){
+      redrawMarkup();
+      const ctx=canvas.getContext("2d");
+      drawShape(ctx,{type:markupCtx.tool,x1:markupCtx.start.x,y1:markupCtx.start.y,x2:p.x,y2:p.y},mkLineWidth(canvas));
+    } else if(mode==="move" && dragStart){
+      const dx=p.x-dragStart.x, dy=p.y-dragStart.y;
+      markupCtx.shapes[0]={type:dragOrig.type,x1:dragOrig.x1+dx,y1:dragOrig.y1+dy,x2:dragOrig.x2+dx,y2:dragOrig.y2+dy};
+      redrawMarkup();
+    }
   };
   const up=(e)=>{
-    if(!markupCtx.start)return; e.preventDefault();
-    const p=getPos(e.changedTouches?{touches:e.changedTouches}:e);
-    markupCtx.shapes.push({type:markupCtx.tool,x1:markupCtx.start.x,y1:markupCtx.start.y,x2:p.x,y2:p.y});
-    markupCtx.start=null; redrawMarkup();
+    e.preventDefault();
+    if(mode==="draw" && markupCtx.start){
+      const p=getPos(e.changedTouches?{touches:e.changedTouches}:e);
+      let x1=markupCtx.start.x, y1=markupCtx.start.y, x2=p.x, y2=p.y;
+      // ほぼタップ（ドラッグが小さい）なら、押した位置に既定サイズで置く
+      if(Math.abs(x2-x1)<12 && Math.abs(y2-y1)<12){
+        const d=Math.max(28, canvas.width/10), cx=x1, cy=y1;
+        if(markupCtx.tool==="circle"){ x1=cx-d; y1=cy-d; x2=cx+d; y2=cy+d; }
+        else { x1=cx-d; y1=cy+d; x2=cx+d; y2=cy-d; } // 既定の矢印（右上向き）
+      }
+      markupCtx.shapes=[{type:markupCtx.tool,x1,y1,x2,y2}]; // 印は常に1つだけ
+    }
+    mode=null; markupCtx.start=null; dragStart=null; dragOrig=null;
+    redrawMarkup();
   };
+  const dist2=(t)=>Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
+  let pinchStartDist=0, pinchOrig=null;
+  // マウス（PC）：ドラッグで描く/動かす、ホイールで拡大・縮小
   canvas.addEventListener("mousedown",down); canvas.addEventListener("mousemove",move); canvas.addEventListener("mouseup",up);
-  canvas.addEventListener("touchstart",down,{passive:false}); canvas.addEventListener("touchmove",move,{passive:false}); canvas.addEventListener("touchend",up,{passive:false});
+  canvas.addEventListener("wheel",(e)=>{
+    if(!markupCtx.shapes.length)return; e.preventDefault();
+    const f=e.deltaY<0?1.06:0.94;
+    markupCtx.shapes[0]=clampShape(scaleShape(markupCtx.shapes[0],f),canvas);
+    redrawMarkup();
+  },{passive:false});
+  // タッチ（iPad・iPhone）：1本指で描く/動かす、2本指ピンチで拡大・縮小
+  canvas.addEventListener("touchstart",(e)=>{
+    e.preventDefault();
+    if(e.touches.length===2 && markupCtx.shapes.length){
+      mode="pinch"; pinchStartDist=dist2(e.touches)||1; pinchOrig={...markupCtx.shapes[0]};
+      markupCtx.start=null; dragStart=null;
+    } else { down(e); }
+  },{passive:false});
+  canvas.addEventListener("touchmove",(e)=>{
+    e.preventDefault();
+    if(mode==="pinch" && e.touches.length===2){
+      const f=dist2(e.touches)/pinchStartDist;
+      markupCtx.shapes[0]=clampShape(scaleShape(pinchOrig,f),canvas);
+      redrawMarkup();
+    } else if(mode!=="pinch"){ move(e); }
+  },{passive:false});
+  canvas.addEventListener("touchend",(e)=>{
+    e.preventDefault();
+    if(mode==="pinch"){ if(e.touches.length<2){ mode=null; pinchOrig=null; } return; }
+    up(e);
+  },{passive:false});
 }
-function markupUndo(){ markupCtx.shapes.pop(); redrawMarkup(); }
+// 中心を保ったまま拡大・縮小する
+function scaleShape(s,f){
+  const cx=(s.x1+s.x2)/2, cy=(s.y1+s.y2)/2;
+  return {type:s.type, x1:cx+(s.x1-cx)*f, y1:cy+(s.y1-cy)*f, x2:cx+(s.x2-cx)*f, y2:cy+(s.y2-cy)*f};
+}
+// 小さすぎ・大きすぎを防ぐ
+function clampShape(s,canvas){
+  const cx=(s.x1+s.x2)/2, cy=(s.y1+s.y2)/2;
+  let hw=(s.x2-s.x1)/2, hh=(s.y2-s.y1)/2;
+  const size=Math.hypot(hw,hh)||1, minS=Math.max(8,canvas.width/40), maxS=canvas.width*0.9;
+  let f=1; if(size<minS)f=minS/size; else if(size>maxS)f=maxS/size;
+  hw*=f; hh*=f;
+  return {type:s.type, x1:cx-hw, y1:cy-hh, x2:cx+hw, y2:cy+hh};
+}
+function markupReset(){ markupCtx.shapes=[]; redrawMarkup(); }
 function closeMarkup(){ const m=document.getElementById("markupModal"); if(m)m.remove(); }
 function saveMarkup(){
   const canvas=document.getElementById("markupCanvas");
