@@ -401,9 +401,9 @@ button{font-family:inherit; cursor:pointer; border:none; background:none;}
 <div id="app"></div>
 <div class="toast" id="toast"></div>
 <script>
-const FACILITIES_SEED = [{"id": 0, "person": "高橋 晃", "block": "南校舎棟１F", "place": "校長室"}, {"id": 1, "person": "高橋 晃", "block": "南校舎棟１F", "place": "事務室"}, {"id": 2, "person": "鈴木 野乃香", "block": "南校舎棟１F", "place": "職員・来客玄関ポーチ"}, {"id": 3, "person": "鈴木 野乃香", "block": "北校舎棟１F", "place": "消火栓ポンプ室"}, {"id": 4, "person": "細川 功", "block": "南校舎棟１F", "place": "技能職員室"}, {"id": 5, "person": "細川 功", "block": "南校舎棟１F", "place": "職員トイレ(男)"}, {"id": 6, "person": "細川 功", "block": "北校舎棟１F", "place": "LPGボンベ庫・ゴミ置き場"}, {"id": 7, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "放送室"}, {"id": 8, "person": "玉山 幸平", "block": "南校舎棟１F", "place": "視聴覚室"}, {"id": 9, "person": "玉山 幸平", "block": "南校舎棟２F", "place": "パソコン室"}, {"id": 10, "person": "村上 みさと", "block": "南校舎棟１F", "place": "職員室(小中分)"}, {"id": 11, "person": "村上 みさと", "block": "南校舎棟１F", "place": "湯沸室"}, {"id": 12, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "倉庫(職員室前)"}, {"id": 13, "person": "熊谷 美早紀", "block": "南校舎棟１F", "place": "階段(職員室前)"}, {"id": 14, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "会議室"}, {"id": 15, "person": "菊池 いずみ", "block": "南校舎棟１F", "place": "教育相談室"}, {"id": 16, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "書庫"}, {"id": 17, "person": "伊藤 弘美", "block": "南校舎棟１F", "place": "エレベーター"}, {"id": 18, "person": "伊藤 弘美", "block": "南校舎棟２F", "place": "教材室（印刷室関係）"}, {"id": 19, "person": "星野 美和子", "block": "南校舎棟１F", "place": "支援室"}, {"id": 20, "person": "星野 美和子", "block": "南校舎棟１F", "place": "廊下(放送室前～EVホール～教材室)"}, {"id": 21, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "保健室"}, {"id": 22, "person": "村木 ゆき", "block": "南校舎棟１F", "place": "倉庫(理科室隣)"}, {"id": 23, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "医療的ケア室"}, {"id": 24, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "小学部5年２組・6年2組"}, {"id": 25, "person": "浅沼 樹", "block": "南校舎棟１F", "place": "児童生徒トイレ(男子)"}, {"id": 26, "person": "湊 敬子", "block": "南校舎棟１F", "place": "小学部１年１組"}, {"id": 27, "person": "湊 敬子", "block": "南校舎棟１F", "place": "職員更衣室(女)"}, {"id": 28, "person": "細越 捺美", "block": "南校舎棟１F", "place": "小学部1年2組・2年2組・4年3組"}, {"id": 29, "person": "細越 捺美", "block": "南校舎棟１F", "place": "多目的トイレ"}, {"id": 30, "person": "細越 捺美", "block": "南校舎棟１F", "place": "シャワー室"}, {"id": 31, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "小学部2年1組"}, {"id": 32, "person": "大澤 美咲", "block": "南校舎棟１F", "place": "階段(理科室隣)"}, {"id": 33, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "個別学習室１（小学部）"}, {"id": 34, "person": "佐々木 尚子", "block": "南校舎棟１F", "place": "教材室１"}, {"id": 35, "person": "近藤 史隆", "block": "南校舎棟１F", "place": "体育館渡り廊下・ホール・トイレ"}, {"id": 36, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "生徒トイレ(男子)"}, {"id": 37, "person": "近藤 史隆", "block": "北校舎棟１F", "place": "個別学習室２（高等部）"}, {"id": 38, "person": "菊池 健斗", "block": "南校舎棟１F", "place": "体育館"}, {"id": 39, "person": "菊池 健斗", "block": "屋外", "place": "グラウンド（遊具等）"}, {"id": 40, "person": "荒木 沙也香", "block": "南校舎棟１F", "place": "図工室（準備室）"}, {"id": 41, "person": "荒木 沙也香", "block": "南校舎棟２F", "place": "中学部３年１組"}, {"id": 42, "person": "竹澤 里栄", "block": "南校舎棟１F", "place": "理科室（準備室）"}, {"id": 43, "person": "竹澤 里栄", "block": "南校舎棟２F", "place": "図書室"}, {"id": 44, "person": "吉田 好子", "block": "南校舎棟１F", "place": "児童生徒トイレ(女子)"}, {"id": 45, "person": "吉田 好子", "block": "南校舎棟１F", "place": "プレイルーム・ホール・渡り廊下"}, {"id": 46, "person": "高橋 天地", "block": "南校舎棟１F", "place": "職員更衣室(男)"}, {"id": 47, "person": "高橋 天地", "block": "南校舎棟２F", "place": "中学部１年１組"}, {"id": 48, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "職員トイレ(女)"}, {"id": 49, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "テラス"}, {"id": 50, "person": "佐藤 暢子", "block": "南校舎棟１F", "place": "児童生徒昇降口・ポーチ"}, {"id": 51, "person": "臼澤 育子", "block": "南校舎棟１F", "place": "給食配膳室"}, {"id": 52, "person": "千田 一輝", "block": "北校舎棟１F", "place": "高等部工芸室"}, {"id": 53, "person": "千田 一輝", "block": "北校舎棟２F", "place": "高等部３年１組"}, {"id": 54, "person": "千葉 登志美", "block": "北校舎棟１F", "place": "高等部紙工室"}, {"id": 55, "person": "千葉 登志美", "block": "北校舎棟２F", "place": "生徒更衣室(女)"}, {"id": 56, "person": "阿部 良利", "block": "北校舎棟１F", "place": "高等部作業室"}, {"id": 57, "person": "阿部 良利", "block": "北校舎棟２F", "place": "生徒トイレ(男子)"}, {"id": 58, "person": "城内 美沙", "block": "北校舎棟１F", "place": "家庭科室（準備室・作法室）"}, {"id": 59, "person": "城内 美沙", "block": "南校舎棟２F", "place": "中学部調理室（準備室）"}, {"id": 60, "person": "古戸 優望", "block": "北校舎棟１F", "place": "階段(トイレ前)"}, {"id": 61, "person": "古戸 優望", "block": "北校舎棟２F", "place": "高等部２年２組"}, {"id": 62, "person": "福士 優", "block": "北校舎棟１F", "place": "生徒トイレ(女子)"}, {"id": 63, "person": "福士 優", "block": "北校舎棟２F", "place": "職員トイレ(女)"}, {"id": 64, "person": "高橋 珠", "block": "北校舎棟１F", "place": "多目的トイレ"}, {"id": 65, "person": "高橋 珠", "block": "北校舎棟１F", "place": "シャワー室"}, {"id": 66, "person": "畠山 麻優香", "block": "北校舎棟１F", "place": "廊下・プール渡り廊下"}, {"id": 67, "person": "畠山 麻優香", "block": "北校舎棟２F", "place": "高等部1年1組"}, {"id": 68, "person": "工藤 柊", "block": "北校舎棟１F", "place": "プール"}, {"id": 69, "person": "工藤 柊", "block": "南校舎棟２F", "place": "中学部２年１組"}, {"id": 70, "person": "阿部 藍", "block": "北校舎棟１F", "place": "高等部２年３組"}, {"id": 71, "person": "阿部 藍", "block": "北校舎棟１F", "place": "個別学習室１（高等部）"}, {"id": 72, "person": "那須 星香", "block": "南校舎棟２F", "place": "中学部２年２組"}, {"id": 73, "person": "那須 星香", "block": "南校舎棟２F", "place": "多目的トイレ"}, {"id": 74, "person": "那須 星香", "block": "南校舎棟２F", "place": "シャワー室"}, {"id": 75, "person": "志田 望", "block": "南校舎棟２F", "place": "中学部紙工室（準備室）"}, {"id": 76, "person": "志田 望", "block": "南校舎棟２F", "place": "児童生徒トイレ(男子)"}, {"id": 77, "person": "志田 望", "block": "南校舎棟２F", "place": "生徒更衣室(男子)"}, {"id": 78, "person": "村上 綾", "block": "南校舎棟２F", "place": "教材室２"}, {"id": 79, "person": "村上 綾", "block": "南校舎棟２F", "place": "個別学習室１(中学部)"}, {"id": 80, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "個別学習室２(中学部)"}, {"id": 81, "person": "長野 和歌子", "block": "南校舎棟２F", "place": "廊下(教材室～音楽室)"}, {"id": 82, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "個別学習室２（小学部）"}, {"id": 83, "person": "岩渕 正子", "block": "南校舎棟２F", "place": "屋外階段１・避難滑り台"}, {"id": 84, "person": "中家 夏海", "block": "南校舎棟２F", "place": "小学部4年1組"}, {"id": 85, "person": "中家 夏海", "block": "南校舎棟２F", "place": "音楽室（準備室）"}, {"id": 86, "person": "久保 美紀", "block": "南校舎棟２F", "place": "小学部３年１組"}, {"id": 87, "person": "久保 美紀", "block": "南校舎棟２F", "place": "廊下(渡り廊下～北校舎階段横廊下)"}, {"id": 88, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "小学部4年2組・5年1組・6年1組"}, {"id": 89, "person": "袴田 まどか", "block": "南校舎棟２F", "place": "バルコニー"}, {"id": 90, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "児童生徒トイレ(女子)"}, {"id": 91, "person": "千崎 友里子", "block": "南校舎棟２F", "place": "生徒更衣室(女子)"}, {"id": 92, "person": "柏山 典子", "block": "北校舎棟２F", "place": "高等部２年1組"}, {"id": 93, "person": "柏山 典子", "block": "北校舎棟２F", "place": "教材室４"}, {"id": 94, "person": "千葉 智子", "block": "北校舎棟２F", "place": "職員室(高)"}, {"id": 95, "person": "千葉 智子", "block": "北校舎棟２F", "place": "湯沸室"}, {"id": 96, "person": "中條 広一", "block": "北校舎棟２F", "place": "屋外階段２"}, {"id": 97, "person": "中條 広一", "block": "北校舎棟２F", "place": "廊下(職員室前～生徒用トイレ前)"}, {"id": 98, "person": "新沼 千明", "block": "北校舎棟２F", "place": "生徒トイレ(女子)"}, {"id": 99, "person": "新沼 千明", "block": "北校舎棟２F", "place": "多目的トイレ"}, {"id": 100, "person": "新沼 千明", "block": "北校舎棟２F", "place": "シャワー室"}, {"id": 101, "person": "新沼 千明", "block": "屋外", "place": "部室棟"}, {"id": 102, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "職員トイレ(男)"}, {"id": 103, "person": "斎藤 道幸", "block": "北校舎棟２F", "place": "生徒更衣室(男)"}, {"id": 104, "person": "太田 綾", "block": "釜石病院校舎", "place": "学習室１"}, {"id": 105, "person": "太田 綾", "block": "釜石病院校舎", "place": "洗面室"}, {"id": 106, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "学習室２"}, {"id": 107, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "男子トイレ・シャワー室"}, {"id": 108, "person": "小水内 光浩", "block": "釜石病院校舎", "place": "階段"}, {"id": 109, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "学習室３"}, {"id": 110, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "教材室"}, {"id": 111, "person": "小笠原 早苗", "block": "釜石病院校舎", "place": "女子トイレ"}];
-const PERSONS_SEED = ["高橋 晃", "鈴木 野乃香", "細川 功", "玉山 幸平", "村上 みさと", "熊谷 美早紀", "菊池 いずみ", "伊藤 弘美", "星野 美和子", "村木 ゆき", "浅沼 樹", "湊 敬子", "細越 捺美", "大澤 美咲", "佐々木 尚子", "近藤 史隆", "菊池 健斗", "荒木 沙也香", "竹澤 里栄", "吉田 好子", "高橋 天地", "佐藤 暢子", "臼澤 育子", "千田 一輝", "千葉 登志美", "阿部 良利", "城内 美沙", "古戸 優望", "福士 優", "高橋 珠", "畠山 麻優香", "工藤 柊", "阿部 藍", "那須 星香", "志田 望", "村上 綾", "長野 和歌子", "岩渕 正子", "中家 夏海", "久保 美紀", "袴田 まどか", "千崎 友里子", "柏山 典子", "千葉 智子", "中條 広一", "新沼 千明", "斎藤 道幸", "太田 綾", "小水内 光浩", "小笠原 早苗"];
-const ITEMS_SEED = ["床の浮きや破損はないか", "床が滑りやすく、転倒の危険はないか", "棚の上から落ちそうな危険な物はないか／棚はきちんと固定されているか", "黒板・掲示物の取り付けは安全か", "天井・壁に破損はないか", "TV・教具等の備品設置場所は適切か", "窓やガラスがはずれやすくなっている箇所や破損はないか", "机・椅子・棚類の破損はないか", "敷居のレール及び戸や鍵は安全か", "通路や出入り口付近は歩きやすく安全か", "ベランダの破損や異状はないか", "非常時の退避口の状況はよいか", "手洗い場付近は清潔で安全か", "階段の手すりに異状はないか", "スイッチ・コンセント等に異状はないか", "照明及び電気器具に異状はないか", "暖房器具の破損、異状はないか", "ガスコンロ、湯沸かし器の異状、管の傷みはないか", "消火器の周りにじゃまなものはないか", "清掃用具置き場は整理され、衛生的か"];
+const FACILITIES_SEED = [];  // 施設は「施設の管理」画面から登録します
+const PERSONS_SEED = [];  // 先生は「担当の先生の管理」画面から登録します
+const ITEMS_SEED = [];  // 点検項目は「点検項目の管理」画面から登録します
 
 </script>
 <script>
@@ -422,6 +422,11 @@ const ITEMS_SEED = ["床の浮きや破損はないか", "床が滑りやすく�
 const SUPABASE_URL = "https://glxszbwsvembyygocekp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdseHN6YndzdmVtYnl5Z29jZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MDA5MzEsImV4cCI6MjA5NzE3NjkzMX0.Me73xDBFtOsNZ6ZRZZH8TNeXfwpiYvPBlplh4kRPsds";
 const BUCKET = "inspection-photos";
+// 学校コードと合言葉でログインします。学校コードは Supabase の利用者1つ＝1校に対応。
+// 「学校コード@この文字列」が、Supabaseに登録するメールアドレスになります。
+const LOGIN_DOMAIN = "anzentenken.invalid";
+let SCHOOL_ID = null;   // ログイン中の学校のID（＝Supabaseの利用者ID）
+let SCHOOL_NAME = "";   // 画面に出す学校名
 
 let sb = null;
 try {
@@ -429,6 +434,95 @@ try {
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 } catch (e) { console.warn("Supabase未接続", e); }
+
+/* ============================================================
+   ログイン（学校ごとの合言葉）
+   学校＝Supabaseの利用者1つ。SCHOOL_ID はその利用者IDで、
+   すべてのデータ行に付きます。Supabase側の設定（RLS）により、
+   自分の学校の行以外は読むことも書くこともできません。
+   ============================================================ */
+function schoolEmail(code){ return `${String(code).trim().toLowerCase()}@${LOGIN_DOMAIN}`; }
+
+// ログイン済みなら SCHOOL_ID を埋めて true を返す
+async function restoreSession(){
+  if(!sb) return false;
+  try{
+    const { data }=await sb.auth.getSession();
+    if(!data || !data.session) return false;
+    SCHOOL_ID=data.session.user.id;
+    await loadSchoolName();
+    return true;
+  }catch(e){ console.warn("セッション確認",e); return false; }
+}
+async function loadSchoolName(){
+  if(!sb||!SCHOOL_ID) return;
+  try{
+    const { data }=await sb.from("schools").select("name, code").eq("id",SCHOOL_ID).maybeSingle();
+    if(data) SCHOOL_NAME=data.name||data.code||"";
+  }catch(e){ console.warn("学校名の読込",e); }
+}
+async function doLogin(){
+  const code=document.getElementById("login-code").value.trim();
+  const pass=document.getElementById("login-pass").value;
+  const btn=document.getElementById("login-btn");
+  const err=document.getElementById("login-err");
+  err.textContent="";
+  if(!code||!pass){ err.textContent="学校コードと合言葉の両方を入れてください。"; return; }
+  btn.disabled=true; btn.textContent="確認中…";
+  try{
+    const { data, error }=await sb.auth.signInWithPassword({ email:schoolEmail(code), password:pass });
+    if(error) throw error;
+    // ログインした学校を覚える（これが無いと保存時に学校の印が付かない）
+    SCHOOL_ID=data.user.id;
+    await loadSchoolName();
+    await bootApp();
+  }catch(e){
+    console.warn(e);
+    err.textContent="学校コードか合言葉が違うようです。係の先生に確認してください。";
+    btn.disabled=false; btn.textContent="ログイン";
+  }
+}
+async function doLogout(){
+  if(!confirm("ログアウトすると、次に開いたときに合言葉の入力が必要になります。\n\nログアウトしますか？")) return;
+  try{ await sb.auth.signOut(); }catch(e){ console.warn(e); }
+  location.reload();
+}
+function renderLogin(){
+  app.innerHTML=`<div class="screen" style="max-width:420px;margin:0 auto;padding-top:36px">
+    <h1 style="font-size:22px;margin:0 0 6px">安全点検</h1>
+    <div class="sub" style="margin-bottom:22px">この端末では初回だけ入力します。次からは省略されます。</div>
+    <label class="mlabel">学校コード</label>
+    <input class="search" id="login-code" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="係の先生から伝えられたコード">
+    <label class="mlabel" style="margin-top:12px">合言葉</label>
+    <input class="search" id="login-pass" type="password" autocomplete="current-password" placeholder="合言葉">
+    <div id="login-err" style="color:var(--bad);font-size:13px;margin-top:10px;min-height:18px"></div>
+    <button class="submit" id="login-btn" style="margin-top:6px" onclick="doLogin()">ログイン</button>
+    <div class="setup-warn" style="margin-top:22px">
+      合言葉は職員で共有するものです。<b>個人で使っているパスワードは使わないでください。</b>
+    </div>
+  </div>`;
+  const pass=document.getElementById("login-pass");
+  pass.addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
+}
+
+/* ---- 写真の表示URL ----
+   写真置き場は非公開です。表示のたびに、その学校の人にだけ有効な
+   一時URL（1時間）を発行します。保存してあるのはURLではなく置き場所の名前です。 */
+const signedCache=new Map();
+async function photoUrl(v){
+  if(!v) return "";
+  if(/^https?:\/\//.test(v)) return v;   // 公開バケット時代の古いデータはそのまま表示
+  if(!sb) return "";
+  const hit=signedCache.get(v);
+  if(hit && hit.exp>Date.now()) return hit.url;
+  try{
+    const { data, error }=await sb.storage.from(BUCKET).createSignedUrl(v,3600);
+    if(error||!data) return "";
+    signedCache.set(v,{url:data.signedUrl,exp:Date.now()+50*60*1000});
+    return data.signedUrl;
+  }catch(e){ console.warn("写真URLの発行",e); return ""; }
+}
+function photoUrlsOf(list){ return Promise.all((list||[]).map(photoUrl)); }
 
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
 
@@ -647,7 +741,7 @@ function renderHome(){
   }
 
   app.innerHTML=`
-  ${topbar("安全点検", inExtra?"臨時点検モードです":"点検する月を選べます")}
+  ${topbar("安全点検", inExtra?"臨時点検モードです":(SCHOOL_NAME?esc(SCHOOL_NAME):"点検する月を選べます"))}
   <div class="screen">
     ${topArea}
     ${extraEntry}
@@ -659,7 +753,8 @@ function renderHome(){
       <div><div class="ht">担当の登録・変更</div><div class="hd">年度初めに、担当する場所を登録します</div></div></button>
     <button class="home-card admin-card" onclick="enterTeacher()"><div class="ic m">📊</div>
       <div><div class="ht">点検状況を見る（管理）</div><div class="hd">要修繕・提出状況の確認、施設・先生・項目の設定</div></div></button>
-    ${ sb?"":`<div class="setup-warn" style="margin-top:20px"><b>準備中：</b> いまは保存先（Supabase）が未設定です。操作は試せますが保存されません。app.js の <b>SUPABASE_ANON_KEY</b> を設定すると保存できます。</div>`}
+    ${ sb?"":`<div class="setup-warn" style="margin-top:20px"><b>準備中：</b> いまは保存先（Supabase）が未設定です。操作は試せますが保存されません。<b>SUPABASE_URL</b> と <b>SUPABASE_ANON_KEY</b> を設定すると保存できます。</div>`}
+    ${ SCHOOL_ID?`<div style="text-align:center;margin-top:26px"><button class="back" onclick="doLogout()" style="font-size:13px">この端末からログアウト</button></div>`:""}
   </div>`;
 }
 // 臨時点検の入口を押したとき（点検する先生用）
@@ -825,8 +920,8 @@ async function regSave(){
   });
   if(!sb){toast("保存先が未設定のため、今は端末内のみ反映されます");state.screen="home";render();return;}
   try{
-    const rows=FACILITIES.map(f=>({facility_id:f.id,place:f.place,block:f.block,person:personsOf(f.id).join("・")}));
-    const {error}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"});
+    const rows=FACILITIES.map(f=>({school_id:SCHOOL_ID,facility_id:f.id,place:f.place,block:f.block,person:personsOf(f.id).join("・")}));
+    const {error}=await sb.from("assignments").upsert(rows,{onConflict:"school_id,facility_id"});
     if(error)throw error;
     toast("担当を登録しました");state.screen="home";render();
   }catch(e){console.error(e);toast("登録の保存に失敗しました。電波を確認して再度お試しください");}
@@ -904,7 +999,11 @@ async function loadExisting(fid){
     if(!error&&data&&data.answers){
       // 今月の既存データがある → それを読み込む
       const a=typeof data.answers==="string"?JSON.parse(data.answers):data.answers;
-      Object.keys(a).forEach(k=>{state.answers[k]={mark:a[k].mark,note:a[k].note||"",photos:(a[k].photos||[]).map(u=>({url:u,uploaded:true}))};});
+      for(const k of Object.keys(a)){
+        const saved=a[k].photos||[];
+        const urls=await photoUrlsOf(saved);
+        state.answers[k]={mark:a[k].mark,note:a[k].note||"",photos:saved.map((p,pi)=>({url:urls[pi],path:p,uploaded:true}))};
+      }
       return;
     }
     // 今月がまだ → 前月の「設備なし(／)」だけ引き継いで初期表示
@@ -1040,6 +1139,7 @@ function openMarkup(i,pi){
   document.body.appendChild(modal);
   const canvas=document.getElementById("markupCanvas");
   const img=new Image();
+  img.crossOrigin="anonymous";  // 保存済み写真に印を付け直せるようにする
   img.onload=()=>{
     // 表示サイズに合わせてcanvasを設定（元画像の比率を保つ）
     const maxW=Math.min(window.innerWidth-40, 700);
@@ -1210,12 +1310,13 @@ async function submitInspection(){
   btn.disabled=true;btn.textContent="送信中…";
   try{
     const out={};
-    for(const k of Object.keys(state.answers)){const a=state.answers[k];const photoUrls=[];
-      for(const p of (a.photos||[])){if(p.uploaded&&p.url){photoUrls.push(p.url);continue;}if(p.dataUrl){const blob=dataUrlToBlob(p.dataUrl);const path=`${MONTH}/${f.id}/${k}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;const{error:upErr}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:"image/jpeg",upsert:false});if(upErr){console.warn(upErr);continue;}const{data:pub}=sb.storage.from(BUCKET).getPublicUrl(path);photoUrls.push(pub.publicUrl);}}
-      out[k]={mark:a.mark,note:a.note||"",photos:photoUrls,item:ITEMS[k]||""};}
+    for(const k of Object.keys(state.answers)){const a=state.answers[k];const photoPaths=[];
+      // 保存するのは公開URLではなく置き場所の名前。先頭に学校のIDを付けて、学校ごとに分ける。
+      for(const p of (a.photos||[])){if(p.uploaded&&(p.path||p.url)){photoPaths.push(p.path||p.url);continue;}if(p.dataUrl){const blob=dataUrlToBlob(p.dataUrl);const path=`${SCHOOL_ID}/${MONTH}/${f.id}/${k}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;const{error:upErr}=await sb.storage.from(BUCKET).upload(path,blob,{contentType:"image/jpeg",upsert:false});if(upErr){console.warn(upErr);continue;}photoPaths.push(path);}}
+      out[k]={mark:a.mark,note:a.note||"",photos:photoPaths,item:ITEMS[k]||""};}
     const hasIssue=Object.values(out).some(o=>o.mark==="bad"||o.mark==="warn");
-    const row={facility_id:f.id,place:f.place,block:f.block,person:state.person,month:MONTH,answers:out,has_issue:hasIssue,submitted_at:new Date().toISOString()};
-    const{error}=await sb.from("inspections").upsert(row,{onConflict:"facility_id,month"});
+    const row={school_id:SCHOOL_ID,facility_id:f.id,place:f.place,block:f.block,person:state.person,month:MONTH,answers:out,has_issue:hasIssue,submitted_at:new Date().toISOString()};
+    const{error}=await sb.from("inspections").upsert(row,{onConflict:"school_id,facility_id,month"});
     if(error)throw error;
     toast("提出しました。お疲れさまでした");state.submittedThisMonth.add(f.id);state.screen="facilityList";render();
   }catch(e){console.error(e);toast("送信に失敗しました。電波を確認して再度お試しください");btn.disabled=false;btn.textContent="✓ この場所の点検を提出する";}
@@ -1233,7 +1334,16 @@ async function loadExtraKeys(){
   }catch(e){ console.warn("臨時キー読込",e); }
 }
 async function goTeacher(){if(!facilitiesLoaded)await loadFacilities();if(!itemsLoaded)await loadItems();if(!assignLoaded)await loadAssignments();state.screen="teacher";state.teacherTab="issues";await loadExtraKeys();await loadAllRecords();await loadRepairs();render();checkOldRecords();}
-async function loadAllRecords(){state.records=[];if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("month",MONTH);if(!error&&data)state.records=data.map(r=>({...r,answers:typeof r.answers==="string"?JSON.parse(r.answers):r.answers}));}catch(e){console.warn(e);}}
+async function loadAllRecords(){state.records=[];if(!sb)return;try{const{data,error}=await sb.from("inspections").select("*").eq("month",MONTH);if(!error&&data)state.records=data.map(r=>({...r,answers:typeof r.answers==="string"?JSON.parse(r.answers):r.answers}));await signRecordPhotos();}catch(e){console.warn(e);}}
+// 管理画面と報告書で写真を表示するため、置き場所の名前から一時URLを作っておく
+async function signRecordPhotos(){
+  for(const r of state.records){
+    const a=r.answers||{};
+    for(const k of Object.keys(a)){
+      a[k].photoUrls=await photoUrlsOf(a[k].photos||[]);
+    }
+  }
+}
 async function loadRepairs(){
   REPAIRS={}; if(!sb) return;
   try{
@@ -1246,7 +1356,7 @@ function renderTeacher(){
   const recs=state.records;const submittedIds=new Set(recs.map(r=>r.facility_id));
   const totalFac=FACILITIES.length,doneFac=submittedIds.size;
   const unassigned=FACILITIES.filter(f=>!personOf(f.id));
-  const issues=[];recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{if(a[k].mark==="bad"||a[k].mark==="warn")issues.push({fid:r.facility_id,idx:parseInt(k),place:r.place,block:r.block,person:r.person,item:a[k].item||ITEMS[k]||"",mark:a[k].mark,note:a[k].note,photos:a[k].photos||[]});});});
+  const issues=[];recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{if(a[k].mark==="bad"||a[k].mark==="warn")issues.push({fid:r.facility_id,idx:parseInt(k),place:r.place,block:r.block,person:r.person,item:a[k].item||ITEMS[k]||"",mark:a[k].mark,note:a[k].note,photos:a[k].photoUrls||[]});});});
   const badN=issues.filter(i=>i.mark==="bad").length,warnN=issues.filter(i=>i.mark==="warn").length;
   let body="";
   if(state.teacherTab==="issues"){
@@ -1325,7 +1435,7 @@ async function printMonthReport(){
   recs.forEach(r=>{const a=r.answers||{};Object.keys(a).forEach(k=>{
     if(a[k].mark==="bad"||a[k].mark==="warn"){
       const rep=repairOf(r.facility_id,parseInt(k));
-      issues.push({place:r.place,block:r.block,person:r.person,item:a[k].item||ITEMS[k]||"",mark:a[k].mark,note:a[k].note,photos:a[k].photos||[],rep});
+      issues.push({place:r.place,block:r.block,person:r.person,item:a[k].item||ITEMS[k]||"",mark:a[k].mark,note:a[k].note,photos:a[k].photoUrls||[],rep});
     }
   });});
   issues.sort((a,b)=>(a.mark==="bad"?0:1)-(b.mark==="bad"?0:1));
@@ -1490,7 +1600,7 @@ function renderFacManage(){
       教室配置が変わったときに、施設の名前変更・追加・削除ができます。<b>過去の点検記録は、当時の名前のまま残ります</b>ので安心して変更できます。
     </div>
     <button class="manage-fac-btn add" onclick="openFacAdd()">＋ 新しい施設を追加する</button>
-    ${html}
+    ${FACILITIES.length?html:`<div class="empty">まだ施設が登録されていません。<br>上の「＋ 新しい施設を追加する」から登録してください。</div>`}
   </div>`;
 }
 // 施設の編集モーダル（名前変更）
@@ -1508,6 +1618,7 @@ function openFacAdd(){
 }
 function showFacModal(title, place, block){
   const blocks=[...new Set(FACILITIES.map(f=>f.block))];
+  const noBlocks=!blocks.length;  // 区分が未登録なら新規入力を開いておく
   const blockOpts=blocks.map(b=>`<option value="${esc(b)}" ${b===block?"selected":""}>${esc(b)}</option>`).join("");
   const modal=document.createElement("div");
   modal.className="modal-bg"; modal.id="facModal";
@@ -1517,14 +1628,15 @@ function showFacModal(title, place, block){
     <input class="search" id="fac-place" value="${esc(place)}" placeholder="例：2年1組教室" style="margin-bottom:4px">
     <label class="mlabel">区分（棟・階）</label>
     <select class="month-select" id="fac-block">${blockOpts}</select>
-    <label class="mcheck" style="margin-top:10px"><input type="checkbox" id="fac-newblock"> 新しい区分を作る</label>
-    <input class="search hidden" id="fac-block-new" placeholder="新しい区分名（例：北校舎棟2F）" style="margin-top:8px">
+    <label class="mcheck" style="margin-top:10px"><input type="checkbox" id="fac-newblock" ${noBlocks?"checked":""}> 新しい区分を作る</label>
+    <input class="search ${noBlocks?"":"hidden"}" id="fac-block-new" placeholder="新しい区分名（例：校舎1F）" style="margin-top:8px">
     <div class="modal-btns">
       <button class="mbtn mcancel" onclick="closeFacModal()">キャンセル</button>
       <button class="mbtn msave" onclick="saveFacModal()">保存</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
+  if(noBlocks){ document.getElementById("fac-block").classList.add("hidden"); }
   document.getElementById("fac-newblock").addEventListener("change",e=>{
     const ni=document.getElementById("fac-block-new"); const sel=document.getElementById("fac-block");
     if(e.target.checked){ ni.classList.remove("hidden"); sel.classList.add("hidden"); }
@@ -1551,7 +1663,7 @@ async function saveFacModal(){
     const sort=(FACILITIES.length?Math.max(...FACILITIES.map(f=>f.sort||f.id)):0)+1;
     FACILITIES.push({id,place,block,sort,active:true});
     if(sb){
-      try{ const {error}=await sb.from("facilities").insert({id,place,block,sort_order:sort,active:true}); if(error)throw error; }
+      try{ const {error}=await sb.from("facilities").insert({school_id:SCHOOL_ID,id,place,block,sort_order:sort,active:true}); if(error)throw error; }
       catch(e){ console.error(e); toast("追加に失敗しました"); return; }
     }
     toast("施設を追加しました");
@@ -1635,7 +1747,7 @@ async function savePersonAdd(){
   if(sb){
     try{
       const sort=STAFF.length;
-      const {error}=await sb.from("staff").upsert({name,sort_order:sort},{onConflict:"name"});
+      const {error}=await sb.from("staff").upsert({school_id:SCHOOL_ID,name,sort_order:sort},{onConflict:"school_id,name"});
       if(error)throw error;
     }catch(e){ console.error(e); toast("追加の保存に失敗しました"); return; }
   }
@@ -1656,8 +1768,8 @@ async function deletePerson(name){
   if(sb){
     try{
       if(list.length){
-        const rows=list.map(f=>({facility_id:f.id,place:f.place,block:f.block,person:personsOf(f.id).join("・")}));
-        const {error:aerr}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"}); if(aerr)throw aerr;
+        const rows=list.map(f=>({school_id:SCHOOL_ID,facility_id:f.id,place:f.place,block:f.block,person:personsOf(f.id).join("・")}));
+        const {error:aerr}=await sb.from("assignments").upsert(rows,{onConflict:"school_id,facility_id"}); if(aerr)throw aerr;
       }
       const {error}=await sb.from("staff").delete().eq("name",name); if(error)throw error;
     }catch(e){ console.error(e); toast("削除に失敗しました"); await loadAssignments(); return; }
@@ -1687,7 +1799,7 @@ function renderItemManage(){
       点検する項目を追加・変更・削除できます。並び順は↑↓で変えられます。<b>過去の点検記録は、当時の項目のまま残ります</b>ので安心して変更できます。
     </div>
     <button class="manage-fac-btn add" onclick="openItemAdd()">＋ 新しい点検項目を追加する</button>
-    ${rows}
+    ${ITEMS.length?rows:`<div class="empty">まだ点検項目が登録されていません。<br>上の「＋ 新しい点検項目を追加する」から登録してください。</div>`}
   </div>`;
 }
 let itemEditCtx=null;
@@ -1719,7 +1831,7 @@ async function persistItems(){
   try{
     // 全削除して入れ直す（順番込みで確実に反映）
     await sb.from("items").delete().neq("text","___none___");
-    const rows=ITEMS.map((t,i)=>({text:t,sort_order:i}));
+    const rows=ITEMS.map((t,i)=>({school_id:SCHOOL_ID,text:t,sort_order:i}));
     if(rows.length){ const {error}=await sb.from("items").insert(rows); if(error)throw error; }
     return true;
   }catch(e){ console.error(e); toast("項目の保存に失敗しました"); return false; }
@@ -1801,16 +1913,16 @@ async function applyPersonChange(oldName,newName){
     if(!STAFF.includes(newName)) STAFF.push(newName);
   }
   if(sb){
-    const rows=changed.map(fid=>{const f=FACILITIES.find(x=>x.id===fid)||{};return {facility_id:fid,place:f.place||"",block:f.block||"",person:personsOf(fid).join("・")};});
-    if(rows.length){ const {error}=await sb.from("assignments").upsert(rows,{onConflict:"facility_id"}); if(error)throw error; }
+    const rows=changed.map(fid=>{const f=FACILITIES.find(x=>x.id===fid)||{};return {school_id:SCHOOL_ID,facility_id:fid,place:f.place||"",block:f.block||"",person:personsOf(fid).join("・")};});
+    if(rows.length){ const {error}=await sb.from("assignments").upsert(rows,{onConflict:"school_id,facility_id"}); if(error)throw error; }
     // 名簿テーブルも更新
     try{
       if(personEditCtx && personEditCtx.mode==="rename"){
         await sb.from("staff").delete().eq("name",oldName);
-        await sb.from("staff").upsert({name:newName,sort_order:STAFF.indexOf(newName)+1},{onConflict:"name"});
+        await sb.from("staff").upsert({school_id:SCHOOL_ID,name:newName,sort_order:STAFF.indexOf(newName)+1},{onConflict:"school_id,name"});
       } else {
         await sb.from("staff").delete().eq("name",oldName);
-        await sb.from("staff").upsert({name:newName,sort_order:STAFF.indexOf(newName)+1},{onConflict:"name"});
+        await sb.from("staff").upsert({school_id:SCHOOL_ID,name:newName,sort_order:STAFF.indexOf(newName)+1},{onConflict:"school_id,name"});
       }
     }catch(e){ console.warn("staff更新",e); }
   }
@@ -1876,8 +1988,8 @@ async function saveRepair(){
   REPAIRS[`${fid}_${idx}`]={status,note,person,updated_at:new Date().toISOString()};
   if(!sb){ toast("保存先が未設定のため端末内のみ反映"); closeRepair(); render(); return; }
   try{
-    const row={facility_id:fid,item_index:idx,month:MONTH,status,note,person,updated_at:new Date().toISOString()};
-    const { error }=await sb.from("repairs").upsert(row,{onConflict:"facility_id,item_index,month"});
+    const row={school_id:SCHOOL_ID,facility_id:fid,item_index:idx,month:MONTH,status,note,person,updated_at:new Date().toISOString()};
+    const { error }=await sb.from("repairs").upsert(row,{onConflict:"school_id,facility_id,item_index,month"});
     if(error) throw error;
     toast("対応を記録しました"); closeRepair(); render();
   }catch(e){ console.error(e); toast("保存に失敗しました。電波を確認してください"); }
@@ -1901,7 +2013,19 @@ function render(){
   if(state.screen!=="inspect") window.scrollTo(0,0);
   switch(state.screen){case "home":return renderHome();case "register":return renderRegister();case "person":return renderPersonSelect();case "facilityList":return renderFacilityList();case "inspect":return renderInspect();case "teacher":return renderTeacher();case "facManage":return renderFacManage();case "personManage":return renderPersonManage();case "itemManage":return renderItemManage();}
 }
-(async()=>{await loadFacilities();await loadStaff();await loadItems();await loadAssignments();await loadActiveExtra();render();})();
+async function bootApp(){
+  // 念のため：学校のIDが分からないまま本体に入らない（印の付かない保存を防ぐ）
+  if(sb && !SCHOOL_ID){ await restoreSession(); }
+  facilitiesLoaded=false; staffLoaded=false; itemsLoaded=false; assignLoaded=false;
+  await loadFacilities();await loadStaff();await loadItems();await loadAssignments();await loadActiveExtra();
+  state.screen="home"; render();
+}
+(async()=>{
+  // 保存先が未設定のときは、ログインなしで操作だけ試せるようにする（設定前の確認用）
+  if(!sb){ await bootApp(); return; }
+  if(await restoreSession()){ await bootApp(); }
+  else { renderLogin(); }
+})();
 
 </script>
 </body>
